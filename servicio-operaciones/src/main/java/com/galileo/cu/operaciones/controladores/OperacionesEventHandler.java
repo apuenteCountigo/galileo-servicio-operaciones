@@ -245,8 +245,16 @@ public class OperacionesEventHandler {
 			}
 
 			try {
-				ftp.login(con.getUsuario(), con.getPassword());
 				log.info("CREDENCIALES: " + con.getUsuario() + " :: " + con.getPassword());
+				boolean successLogin = ftp.login(con.getUsuario(), con.getPassword());
+				int replyCode = ftp.getReplyCode();
+				log.info("replyCode");
+				log.info("" + replyCode);
+				if (successLogin) {
+					log.info("successLogin");
+				} else
+					log.info("errorLogin");
+				log.info("Dir Raiz" + ftp.printWorkingDirectory());
 			} catch (Exception e) {
 				Desconectar(ftp);
 				log.error("Usuario o Contraseña Incorrecto, al Intentar Autenticarse en Servidor FTP ");
