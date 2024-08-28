@@ -268,11 +268,8 @@ public class OperacionesEventHandler {
 				throw new IOException("Error, obtenidendo la unidad a la que pertenece la operación");
 			}
 
-			try {
-				ftp.changeWorkingDirectory(baseDir);
-			} catch (Exception e) {
+			if (!ftp.changeWorkingDirectory(baseDir)) {
 				log.error("Error, la ruta suministrada en la conexión ftp, no es válida");
-				log.error(e.getMessage());
 				ftp.changeWorkingDirectory("/");
 			}
 
