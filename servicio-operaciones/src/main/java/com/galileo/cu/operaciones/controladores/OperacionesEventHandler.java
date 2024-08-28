@@ -270,7 +270,8 @@ public class OperacionesEventHandler {
 
 			if (!ftp.changeWorkingDirectory(baseDir)) {
 				log.error("Error, la ruta suministrada en la conexión ftp, no es válida");
-				ftp.changeWorkingDirectory("/");
+				baseDir = "/";
+				ftp.changeWorkingDirectory(baseDir);
 			}
 
 			try {
@@ -293,7 +294,7 @@ public class OperacionesEventHandler {
 				String fechaI = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaInicio());
 				String fechaF = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaFin());
 
-				String unidadesDir = baseDir + "/UNIDADES";
+				String unidadesDir = baseDir + "/UNIDADES/";
 				unidadesDir = unidadesDir.replace("//", "/");
 				try {
 					ftp.mkd(unidadesDir);
