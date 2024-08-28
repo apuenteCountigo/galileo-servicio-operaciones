@@ -252,9 +252,11 @@ public class OperacionesEventHandler {
 				log.info("" + replyCode);
 				if (successLogin) {
 					log.info("successLogin");
-				} else
-					log.info("errorLogin");
-				log.info("Dir Raiz" + ftp.printWorkingDirectory());
+				} else {
+					log.info("Error, intentando la autenticación en el servidor ftp");
+					throw new IOException("Error, intentando la autenticación en el servidor ftp");
+				}
+				log.info("Dir Raiz " + ftp.printWorkingDirectory());
 			} catch (Exception e) {
 				Desconectar(ftp);
 				log.error("Usuario o Contraseña Incorrecto, al Intentar Autenticarse en Servidor FTP ");
