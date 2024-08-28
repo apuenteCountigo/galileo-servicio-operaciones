@@ -88,7 +88,11 @@ public class OperacionesEventHandler {
 		} catch (Exception e) {
 			log.info("Fallo Creando Directorios para Evidencias");
 			log.info(e.getMessage());
-			throw new RuntimeException("Fallo Creando Directorios para Evidencias");
+			if (e.getMessage().contains("Fallo")) {
+				throw new RuntimeException(e.getMessage());
+			} else {
+				throw new RuntimeException("Fallo Creando Directorios para Evidencias");
+			}
 		}
 
 		try {
@@ -230,10 +234,11 @@ public class OperacionesEventHandler {
 						Integer.parseInt(((!Strings.isNullOrEmpty(con.getPuerto())) ? con.getPuerto() : "21")));
 				log.info("FTP con: " + con.getServicio() + " :" + con.getPuerto());
 			} catch (Exception e) {
-				log.error("Conexión Fallida al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
+				log.error(
+						"Fallo al intentar conectarse al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
 				log.error(e.getMessage());
 				throw new IOException(
-						"Conexión Fallida al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
+						"Fallo al intentar conectarse al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
 			}
 			int reply = ftp.getReplyCode();
 			if (!FTPReply.isPositiveCompletion(reply)) {
@@ -241,43 +246,46 @@ public class OperacionesEventHandler {
 				log.error("getReplyCode: Conexión Fallida al servidor FTP " + con.getIpServicio() + ":"
 						+ con.getPuerto());
 				throw new IOException(
-						"Conexión Fallida al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
+						"Fallo al intentar conectarse al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
 			}
 
-			try {
-				log.info("CREDENCIALES: " + con.getUsuario() + " :: " + con.getPassword());
-				boolean successLogin = ftp.login(con.getUsuario(), con.getPassword());
-				int replyCode = ftp.getReplyCode();
-				log.info("replyCode");
-				log.info("" + replyCode);
-				if (successLogin) {
-					log.info("successLogin");
-				} else {
-					log.info("Error, intentando la autenticación en el servidor ftp");
-					throw new IOException("Error, intentando la autenticación en el servidor ftp");
-				}
-				log.info("Dir Raiz " + ftp.printWorkingDirectory());
-			} catch (Exception e) {
+			log.info("CREDENCIALES: " + con.getUsuario() + " :: " + con.getPassword());
+			boolean successLogin = ftp.login(con.getUsuario(), con.getPassword());
+			int replyCode = ftp.getReplyCode();
+			log.info("replyCode");
+			log.info("" + replyCode);
+			if (successLogin) {
+				log.info("La autenticación fue satizfactoria.");
+			} else {
+				log.info("Fallo intentando la autenticación con el servidor ftp");
 				Desconectar(ftp);
-				log.error("Usuario o Contraseña Incorrecto, al Intentar Autenticarse en Servidor FTP ");
-				throw new IOException("Usuario o Contraseña Incorrecto, al Intentar Autenticarse en Servidor FTP "
-						+ con.getIpServicio() + ":" + con.getPuerto());
+				throw new IOException("Fallo intentando la autenticación con el servidor ftp");
+			}
+
+			String baseDir = "/";
+			if (con.getRuta() != null && con.getRuta() != "") {
+				baseDir = con.getRuta();
+			}
+
+			Unidades uni = null;
+			try {
+				uni = uniRep.findById(op.getUnidades().getId()).get();
+			} catch (Exception e) {
+				log.error("Fallo obtenidendo la unidad a la que pertenece la operación");
+				log.error(e.getMessage());
+				throw new IOException("Fallo obtenidendo la unidad a la que pertenece la operación");
+			}
+
+			boolean dirExists = ftp.changeWorkingDirectory(baseDir);
+			replyCode = ftp.getReplyCode();
+
+			if (!dirExists) {
+				log.error("Fallo, la ruta suministrada en la conexión ftp, no es válida");
+				baseDir = "/";
+				ftp.changeWorkingDirectory(baseDir);
 			}
 
 			try {
-				Unidades uni = uniRep.findById(op.getUnidades().getId()).get();
-				ftp.changeWorkingDirectory("/");
-
-				// Listar archivos y directorios en el directorio actual
-				/*
-				 * FTPFile[] files = ftp.listFiles();
-				 * for (FTPFile file : files) {
-				 * if (file.isDirectory()) {
-				 * log.info("Directorio: " + file.getName());
-				 * }
-				 * }
-				 */
-
 				String carpetaUnidad = uni.getDenominacion();
 				String carpetaOperacion = op.getDescripcion();
 				log.info("CREANDO CARPETAS:: " + uni.getDenominacion() + "-" + op.getDescripcion());
@@ -286,20 +294,23 @@ public class OperacionesEventHandler {
 				String fechaI = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaInicio());
 				String fechaF = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaFin());
 
+				String unidadesDir = baseDir + "/UNIDADES/";
+				unidadesDir = unidadesDir.replace("//", "/");
 				try {
-					ftp.mkd("/UNIDADES");
-					ftp.mkd("/UNIDADES/" + carpetaUnidad);
-					ftp.mkd("/UNIDADES/" + carpetaUnidad + "/INFORMES "
+					ftp.mkd(unidadesDir);
+					ftp.mkd(unidadesDir + carpetaUnidad);
+					ftp.mkd(unidadesDir + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion);
-					ftp.mkd("/UNIDADES/" + carpetaUnidad + "/INFORMES "
+					ftp.mkd(unidadesDir + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion + "/PERSONALIZADOS");
-					log.info("/UNIDADES/" + carpetaUnidad + "/INFORMES "
+					log.info(unidadesDir + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion + "/PERSONALIZADOS");
 				} catch (Exception e) {
 					Desconectar(ftp);
-					log.info("Fallo creando Primera Carpeta " + e.getMessage());
+					log.error("Fallo creando Primera Carpeta " + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
+
 				try {
 					ftp.changeWorkingDirectory("/UNIDADES/" + carpetaUnidad + "/INFORMES " + carpetaOperacion);
 					String currentDir = ftp.printWorkingDirectory();
