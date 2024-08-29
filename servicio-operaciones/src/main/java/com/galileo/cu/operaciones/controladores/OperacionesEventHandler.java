@@ -277,8 +277,6 @@ public class OperacionesEventHandler {
 			}
 
 			boolean dirExists = ftp.changeWorkingDirectory(baseDir);
-			replyCode = ftp.getReplyCode();
-
 			if (!dirExists) {
 				log.error("Fallo, la ruta suministrada en la conexión ftp, no es válida");
 				baseDir = "/";
