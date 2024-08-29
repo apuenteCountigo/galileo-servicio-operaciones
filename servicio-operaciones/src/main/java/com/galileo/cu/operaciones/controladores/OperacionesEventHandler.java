@@ -305,7 +305,7 @@ public class OperacionesEventHandler {
 							+ carpetaOperacion + "/PERSONALIZADOS");
 				} catch (Exception e) {
 					Desconectar(ftp);
-					log.error("Fallo creando Primera Carpeta " + e.getMessage());
+					log.error("Fallo creando estructura de Directorios " + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 
