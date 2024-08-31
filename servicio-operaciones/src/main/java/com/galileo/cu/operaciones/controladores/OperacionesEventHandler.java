@@ -28,6 +28,7 @@ import com.galileo.cu.commons.models.Usuarios;
 import com.galileo.cu.operaciones.repositorios.PermisosRepository;
 import com.galileo.cu.operaciones.repositorios.TrazasRepository;
 import com.galileo.cu.operaciones.repositorios.UnidadesRepository;
+import com.galileo.cu.operaciones.servicios.OperacionesOrquestador;
 import com.google.common.base.Strings;
 
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,8 @@ public class OperacionesEventHandler {
 	@Autowired
 	ConexionesRepository conRepo;
 
+	OperacionesOrquestador orquestador;
+
 	public OperacionesEventHandler(HttpServletRequest request) {
 		this.req = request;
 	}
@@ -81,6 +84,15 @@ public class OperacionesEventHandler {
 		} catch (Exception e) {
 			log.info("Fallo Antes de Crear la Operación Validando Autorización: " + e.getMessage());
 			throw new RuntimeException("Fallo Antes de Crear la Operación Validando Autorización: ");
+		}
+
+		try {
+			this.orquestador.iniciarCreacionOperacion(operaciones);
+			if (operaciones != null) {
+				throw new RuntimeException("Fallo Antes de Crear la Operación iniciando orquestador ");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Fallo al iniciarCreacionOperacion: " + e.getMessage());
 		}
 
 		try {
