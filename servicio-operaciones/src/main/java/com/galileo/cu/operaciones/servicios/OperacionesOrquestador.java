@@ -32,7 +32,8 @@ public class OperacionesOrquestador {
         // DMAResultadoDTO resultado = objectMapper.readValue(mensaje,
         // DMAResultadoDTO.class);
         // Añadir idDMA a la operación y enviar a Traccar
-        kafkaTemplate.send("crear-operacion-traccar", objectMapper.writeValueAsString(resultado));
+        // kafkaTemplate.send("crear-operacion-traccar",
+        // objectMapper.writeValueAsString(resultado));
     }
 
     @KafkaListener(topics = "traccar-operacion-creada")
@@ -40,7 +41,8 @@ public class OperacionesOrquestador {
         // TraccarResultadoDTO resultado = objectMapper.readValue(mensaje,
         // TraccarResultadoDTO.class);
         // Añadir idTraccar a la operación y enviar para almacenamiento
-        kafkaTemplate.send("almacenar-operacion", objectMapper.writeValueAsString(resultado));
+        // kafkaTemplate.send("almacenar-operacion",
+        // objectMapper.writeValueAsString(resultado));
     }
 
     @KafkaListener(topics = "operacion-almacenada")
