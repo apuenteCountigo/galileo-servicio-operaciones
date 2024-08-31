@@ -1,5 +1,6 @@
 package com.galileo.cu.operaciones.servicios;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -13,13 +14,15 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class OperacionesOrquestador {
-    private final KafkaTemplate<String, String> kafkaTemplate;
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public OperacionesOrquestador(KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
-        this.kafkaTemplate = kafkaTemplate;
-        this.objectMapper = objectMapper;
-    }
+    // public OperacionesOrquestador(KafkaTemplate<String, String> kafkaTemplate,
+    // ObjectMapper objectMapper) {
+    // this.kafkaTemplate = kafkaTemplate;
+    // this.objectMapper = objectMapper;
+    // }
 
     public void iniciarCreacionOperacion(Operaciones operacion) throws JsonProcessingException {
         log.info("iniciarCreacionOperacion");

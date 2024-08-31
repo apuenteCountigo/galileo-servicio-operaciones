@@ -64,7 +64,8 @@ public class OperacionesEventHandler {
 	@Autowired
 	ConexionesRepository conRepo;
 
-	OperacionesOrquestador orquestador;
+	@Autowired
+	private OperacionesOrquestador orquestador;
 
 	public OperacionesEventHandler(HttpServletRequest request) {
 		this.req = request;
