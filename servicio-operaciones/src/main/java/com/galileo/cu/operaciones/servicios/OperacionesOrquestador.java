@@ -29,7 +29,6 @@ public class OperacionesOrquestador {
     public void iniciarCreacionOperacion(Operaciones operacion) throws JsonProcessingException {
         log.info("iniciarCreacionOperacion");
         String operacionJson = objectMapper.writeValueAsString(operacion);
-        log.info(operacionJson);
         try {
             kafkaTemplate.send("crear-operacion-dma", operacionJson);
         } catch (Exception e) {
