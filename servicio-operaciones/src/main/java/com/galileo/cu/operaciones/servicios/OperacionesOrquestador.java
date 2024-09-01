@@ -16,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 public class OperacionesOrquestador {
     @Autowired
     private KafkaTemplate<String, String> kafkaTemplate = null;
-    private final ObjectMapper objectMapper = null;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     // public OperacionesOrquestador(KafkaTemplate<String, String> kafkaTemplate,
     // ObjectMapper objectMapper) {
