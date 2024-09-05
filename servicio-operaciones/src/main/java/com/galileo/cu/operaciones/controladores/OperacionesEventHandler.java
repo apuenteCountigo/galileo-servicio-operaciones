@@ -325,7 +325,7 @@ public class OperacionesEventHandler {
 				}
 
 				try {
-					ftp.changeWorkingDirectory("/UNIDADES/" + carpetaUnidad + "/INFORMES " + carpetaOperacion);
+					ftp.changeWorkingDirectory(unidadesDir + carpetaUnidad + "/INFORMES " + carpetaOperacion);
 					String currentDir = ftp.printWorkingDirectory();
 					log.info("Directorio actual: " + currentDir);
 					ftp.mkd("FIRMADOS");
