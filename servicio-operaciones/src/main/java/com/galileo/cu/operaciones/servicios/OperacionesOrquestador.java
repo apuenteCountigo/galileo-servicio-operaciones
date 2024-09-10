@@ -20,11 +20,11 @@ public class OperacionesOrquestador {
     @Autowired
     ObjectMapper objectMapper;
 
-    // public OperacionesOrquestador(KafkaTemplate<String, String> kafkaTemplate,
-    // ObjectMapper objectMapper) {
-    // this.kafkaTemplate = kafkaTemplate;
-    // this.objectMapper = objectMapper;
-    // }
+    public OperacionesOrquestador(KafkaTemplate<String, String> kafkaTemplate,
+            ObjectMapper objectMapper) {
+        this.kafkaTemplate = kafkaTemplate;
+        this.objectMapper = objectMapper;
+    }
 
     public void iniciarCreacionOperacion(Operaciones operacion) throws JsonProcessingException {
         log.info("iniciarCreacionOperacion");

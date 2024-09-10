@@ -87,16 +87,15 @@ public class OperacionesEventHandler {
 			throw new RuntimeException("Fallo Antes de Crear la Operación Validando Autorización: ");
 		}
 
-		// try {
-		// this.orquestador.iniciarCreacionOperacion(operaciones);
-		// if (operaciones != null) {
-		// throw new RuntimeException("Fallo Antes de Crear la Operación iniciando
-		// orquestador ");
-		// }
-		// } catch (Exception e) {
-		// throw new RuntimeException("Fallo al iniciarCreacionOperacion: " +
-		// e.getMessage());
-		// }
+		try {
+			this.orquestador.iniciarCreacionOperacion(operaciones);
+			if (operaciones != null) {
+				throw new RuntimeException("Fallo Antes de Crear la Operación iniciando orquestador ");
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("Fallo al iniciarCreacionOperacion: " +
+					e.getMessage());
+		}
 
 		try {
 			CrearDirectorios(operaciones);
