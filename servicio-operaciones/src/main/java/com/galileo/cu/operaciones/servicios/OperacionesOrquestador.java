@@ -38,6 +38,18 @@ public class OperacionesOrquestador {
         }
     }
 
+    public void sendErrorNotification() throws JsonProcessingException {
+        try {
+            log.error("Before errors-notifications");
+            kafkaTemplate.send("errors-notifications", "error test");
+            log.error("After errors-notifications");
+        } catch (Exception e) {
+            log.error("Error, enviando a kafka errors-notifications");
+            log.error(e.getMessage());
+            // throw new RuntimeException("Error, send crear-operacion-dma");
+        }
+    }
+
     @KafkaListener(topics = "dma-operacion-creada")
     public void manejarDMACreado(String mensaje) throws JsonProcessingException {
         // DMAResultadoDTO resultado = objectMapper.readValue(mensaje,

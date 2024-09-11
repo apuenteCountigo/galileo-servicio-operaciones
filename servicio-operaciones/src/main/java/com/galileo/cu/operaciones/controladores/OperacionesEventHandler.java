@@ -88,8 +88,9 @@ public class OperacionesEventHandler {
 		}
 
 		try {
-			this.orquestador.iniciarCreacionOperacion(operaciones);
+			// this.orquestador.iniciarCreacionOperacion(operaciones);
 			if (operaciones != null) {
+				this.orquestador.sendErrorNotification();
 				throw new RuntimeException("Fallo Antes de Crear la Operación iniciando orquestador ");
 			}
 		} catch (Exception e) {
