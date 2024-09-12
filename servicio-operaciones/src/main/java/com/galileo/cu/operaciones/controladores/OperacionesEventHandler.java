@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.galileo.cu.commons.models.AccionEntidad;
+import com.galileo.cu.commons.models.Conexiones;
 import com.galileo.cu.commons.models.Operaciones;
 import com.galileo.cu.commons.models.TipoEntidad;
 import com.galileo.cu.commons.models.Trazas;
