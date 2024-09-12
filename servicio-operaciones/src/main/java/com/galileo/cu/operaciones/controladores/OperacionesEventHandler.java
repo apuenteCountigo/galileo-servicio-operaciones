@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.galileo.cu.commons.models.AccionEntidad;
-import com.galileo.cu.commons.models.Conexiones;
 import com.galileo.cu.commons.models.Operaciones;
 import com.galileo.cu.commons.models.TipoEntidad;
 import com.galileo.cu.commons.models.Trazas;
@@ -252,7 +251,7 @@ public class OperacionesEventHandler {
 
 			try {
 				Unidades uni = uniRep.findById(op.getUnidades().getId()).get();
-				ftp.changeWorkingDirectory("/");
+				// ftp.changeWorkingDirectory("/");
 
 				// Listar archivos y directorios en el directorio actual
 				/*
@@ -272,14 +271,17 @@ public class OperacionesEventHandler {
 				String fechaI = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaInicio());
 				String fechaF = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaFin());
 
+				String currentDir = ftp.printWorkingDirectory();
 				try {
-					ftp.mkd("/UNIDADES");
-					ftp.mkd("/UNIDADES/" + carpetaUnidad);
-					ftp.mkd("/UNIDADES/" + carpetaUnidad + "/INFORMES "
+					currentDir = currentDir + "/UNIDADES";
+					currentDir = currentDir.replace("//", "/");
+					ftp.mkd(currentDir);
+					ftp.mkd(currentDir + "/" + carpetaUnidad);
+					ftp.mkd(currentDir + "/" + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion);
-					ftp.mkd("/UNIDADES/" + carpetaUnidad + "/INFORMES "
+					ftp.mkd(currentDir + "/" + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion + "/PERSONALIZADOS");
-					System.out.println("/UNIDADES/" + carpetaUnidad + "/INFORMES "
+					System.out.println(currentDir + "/" + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion + "/PERSONALIZADOS");
 				} catch (Exception e) {
 					Desconectar(ftp);
@@ -287,8 +289,8 @@ public class OperacionesEventHandler {
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 				try {
-					ftp.changeWorkingDirectory("/UNIDADES/" + carpetaUnidad + "/INFORMES " + carpetaOperacion);
-					String currentDir = ftp.printWorkingDirectory();
+					ftp.changeWorkingDirectory(
+							currentDir + "/" + carpetaUnidad + "/INFORMES " + carpetaOperacion);
 					System.out.println("Directorio actual: " + currentDir);
 					ftp.mkd("FIRMADOS");
 				} catch (Exception e) {
@@ -317,6 +319,7 @@ public class OperacionesEventHandler {
 				Desconectar(ftp);
 				throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 			}
+			throw new RuntimeException("Fallo ****TEST****Creando Directorios para Evidencias");
 		} else {
 			throw new Exception("No Existe un Servicio entre las Conexiones, que Contenga la Palabra FTP");
 		}
