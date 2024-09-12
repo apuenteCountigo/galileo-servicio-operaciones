@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - main
+      - INITDEPLOY
   workflow_dispatch:
 jobs:
   run_pull:
@@ -47,7 +47,8 @@ jobs:
             ssh -i ~/id_rsaalain mome@192.168.0.98 '
             cd galileo-newdev/operaciones/galileo-servicio-operaciones &&
             git fetch origin &&
-            git reset --hard origin/main &&
+            git checkout INITDEPLOY &&
+            git reset --hard origin/INITDEPLOY &&
             git pull &&
             cd servicio-operaciones &&
             export PATH=/opt/maven/bin:$PATH && mvn clean install -DskipTests &&
