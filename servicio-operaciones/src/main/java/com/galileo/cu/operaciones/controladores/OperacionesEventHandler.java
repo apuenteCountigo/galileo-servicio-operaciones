@@ -124,7 +124,7 @@ public class OperacionesEventHandler {
 				throw new RuntimeException(e.getMessage());
 			} else {
 				log.error("Fallo Insertando Grupo en apis externas " + e.getMessage());
-				throw new RuntimeException("Fallo, Insertando Grupo en apis externas, VER LOGS");
+				throw new RuntimeException("Fallo, Insertando Grupo en apis externas, VER LOGS." + e.getMessage());
 			}
 		}
 	}
