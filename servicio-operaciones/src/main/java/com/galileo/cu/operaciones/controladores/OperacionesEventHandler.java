@@ -252,7 +252,6 @@ public class OperacionesEventHandler {
 
 			try {
 				Unidades uni = uniRep.findById(op.getUnidades().getId()).get();
-				// ftp.changeWorkingDirectory("/");
 
 				// Listar archivos y directorios en el directorio actual
 				/*
