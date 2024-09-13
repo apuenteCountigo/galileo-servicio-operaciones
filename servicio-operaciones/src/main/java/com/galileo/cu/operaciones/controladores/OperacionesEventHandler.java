@@ -320,7 +320,6 @@ public class OperacionesEventHandler {
 				Desconectar(ftp);
 				throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 			}
-			throw new RuntimeException("Fallo ****TEST****Creando Directorios para Evidencias");
 		} else {
 			throw new Exception("No Existe un Servicio entre las Conexiones, que Contenga la Palabra FTP");
 		}
