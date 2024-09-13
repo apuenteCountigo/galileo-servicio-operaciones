@@ -97,10 +97,17 @@ public class OperacionesEventHandler {
 
 		try {
 			Operaciones operacionesUpdate = traccar.salvar(operaciones);
+
+			if (operacionesUpdate.getIdGrupo() == null)
+				throw new RuntimeException("Fallo, idGrupo es nulo");
+			if (operacionesUpdate.getIdDataminer() == null)
+				throw new RuntimeException("Fallo, idDataminer es nulo");
+			if (operacionesUpdate.getIdElement() == null)
+				throw new RuntimeException("Fallo, idElement es nulo");
+
 			operaciones.setIdGrupo(operacionesUpdate.getIdGrupo());
 			operaciones.setIdDataminer(operacionesUpdate.getIdDataminer());
 			operaciones.setIdElement(operacionesUpdate.getIdElement());
-			System.out.println("**** servidor=" + operaciones.getServidor().getServicio());
 		} catch (Exception e) {
 			if (e.getMessage().contains("ya existe una operacion")) {
 				System.out.println("CONTIENE, ya existe una operacion ");
@@ -111,10 +118,12 @@ public class OperacionesEventHandler {
 					System.out.println("Fallo Insertando Grupo en Traccar " + e.getMessage());
 					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
 				}
+			} else if (e.getMessage().contains(" es nulo")) {
+				log.error(e.getMessage());
+				throw new RuntimeException(e.getMessage());
 			} else {
-				System.out.println("NO CONTIENE, ya existe una operacion ");
-				System.out.println("Fallo Insertando Grupo en DATAMINER " + e.getMessage());
-				throw new RuntimeException("Fallo, Insertando Grupo en DATAMINER, VER LOGS");
+				log.error("Fallo Insertando Grupo en apis externas " + e.getMessage());
+				throw new RuntimeException("Fallo, Insertando Grupo en apis externas, VER LOGS");
 			}
 		}
 	}
@@ -168,7 +177,7 @@ public class OperacionesEventHandler {
 			}
 			throw new RuntimeException("Fallo, la operación puede ser borrada ");
 		} catch (Exception e) {
-			throw new RuntimeException("Fallo buscando relaciones con objetivos.");
+			throw new RuntimeException("Fallo buscando relaciones con objetivos." + e.getMessage());
 		}
 
 		// try {
