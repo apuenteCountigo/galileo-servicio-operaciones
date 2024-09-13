@@ -29,10 +29,15 @@ import com.galileo.cu.operaciones.repositorios.PermisosRepository;
 import com.galileo.cu.operaciones.repositorios.TrazasRepository;
 import com.galileo.cu.operaciones.repositorios.UnidadesRepository;
 import com.google.common.base.Strings;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.galileo.cu.operaciones.cliente.TraccarFeign;
 import com.galileo.cu.operaciones.repositorios.ConexionesRepository;
+import com.galileo.cu.operaciones.repositorios.ObjetivosRepository;
 import com.galileo.cu.operaciones.repositorios.OperacionesRepository;
 
+@Slf4j
 @Component
 @RepositoryEventHandler(Operaciones.class)
 public class OperacionesEventHandler {
@@ -58,6 +63,9 @@ public class OperacionesEventHandler {
 
 	@Autowired
 	ConexionesRepository conRepo;
+
+	@Autowired
+	ObjetivosRepository objRepo;
 
 	public OperacionesEventHandler(HttpServletRequest request) {
 		this.req = request;
@@ -154,14 +162,24 @@ public class OperacionesEventHandler {
 	@HandleBeforeDelete
 	public void handleOperacionesDelete(Operaciones operaciones) {
 		try {
-			traccar.borrar(operaciones);
+			if (objRepo.existsByOperaciones(operaciones)) {
+				log.info("Esta operación tiene dependencias");
+				throw new RuntimeException("Fallo, la operación tiene objetivos relacionados.");
+			}
+			throw new RuntimeException("Fallo, la operación puede ser borrada ");
 		} catch (Exception e) {
-			System.out.println("Fallo Eliminando Grupo en Traccar " + e.getMessage());
-			throw new RuntimeException("Fallo Eliminando Grupo en Traccar ");
+			throw new RuntimeException("Fallo buscando relaciones con objetivos.");
 		}
 
-		long idoperacion = operaciones.getId();
-		System.out.println("id operacion: " + idoperacion);
+		// try {
+		// traccar.borrar(operaciones);
+		// } catch (Exception e) {
+		// log.error("Fallo Eliminando Grupo en Traccar " + e.getMessage());
+		// throw new RuntimeException("Fallo Eliminando Grupo en Traccar ");
+		// }
+
+		// long idoperacion = operaciones.getId();
+		// System.out.println("id operacion: " + idoperacion);
 	}
 
 	@HandleAfterDelete
