@@ -97,6 +97,7 @@ public class OperacionesEventHandler {
 
 		try {
 			Operaciones operacionesUpdate = traccar.salvar(operaciones);
+			operacionesUpdate.setIdGrupo(null);
 
 			if (operacionesUpdate.getIdGrupo() == null)
 				throw new RuntimeException("Fallo, idGrupo es nulo");
@@ -110,12 +111,12 @@ public class OperacionesEventHandler {
 			operaciones.setIdElement(operacionesUpdate.getIdElement());
 		} catch (Exception e) {
 			if (e.getMessage().contains("ya existe una operacion")) {
-				System.out.println("CONTIENE, ya existe una operacion ");
+				log.error("CONTIENE, ya existe una operacion ");
 				if (e.getMessage().contains("DATAMINER")) {
-					System.out.println("Fallo Insertando Grupo en DATAMINER " + e.getMessage());
+					log.error("Fallo Insertando Grupo en DATAMINER " + e.getMessage());
 					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
 				} else if (e.getMessage().contains("Traccar")) {
-					System.out.println("Fallo Insertando Grupo en Traccar " + e.getMessage());
+					log.error("Fallo Insertando Grupo en Traccar " + e.getMessage());
 					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
 				}
 			} else if (e.getMessage().contains(" es nulo")) {
@@ -177,7 +178,10 @@ public class OperacionesEventHandler {
 			}
 			throw new RuntimeException("Fallo, la operación puede ser borrada ");
 		} catch (Exception e) {
-			throw new RuntimeException("Fallo buscando relaciones con objetivos." + e.getMessage());
+			if (e.getMessage().contains("Fallo")) {
+				throw new RuntimeException(e.getMessage());
+			}
+			throw new RuntimeException("Fallo buscando relaciones con objetivos.");
 		}
 
 		// try {
