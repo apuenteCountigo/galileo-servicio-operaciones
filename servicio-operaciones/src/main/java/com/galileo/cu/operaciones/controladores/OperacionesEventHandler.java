@@ -76,28 +76,27 @@ public class OperacionesEventHandler {
 		/* Validando Autorización */
 		ValidateAuthorization val = new ValidateAuthorization();
 		try {
-			System.out.println("REQUEST HandleBeforeCreate: " + req.getMethod());
 			val.setObjectMapper(objectMapper);
 			val.setReq(req);
 			if (!val.Validate()) {
-				throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado ");
+				log.error("Fallo el Usuario Enviado no Coincide con el Autenticado");
+				throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado");
 			}
 		} catch (Exception e) {
-			System.out.println("Fallo Antes de Crear la Operación Validando Autorización: " + e.getMessage());
+			log.error("Fallo Antes de Crear la Operación Validando Autorización: " + e.getMessage());
 			throw new RuntimeException("Fallo Antes de Crear la Operación Validando Autorización: ");
 		}
 
 		try {
 			CrearDirectorios(operaciones);
 		} catch (Exception e) {
-			System.out.println("Fallo Creando Directorios para Evidencias");
-			System.out.println(e.getMessage());
+			log.error("Fallo Creando Directorios para Evidencias");
+			log.error(e.getMessage());
 			throw new RuntimeException("Fallo Creando Directorios para Evidencias");
 		}
 
 		try {
 			Operaciones operacionesUpdate = traccar.salvar(operaciones);
-			operacionesUpdate.setIdGrupo(null);
 
 			if (operacionesUpdate.getIdGrupo() == null)
 				throw new RuntimeException("Fallo, idGrupo es nulo");
@@ -134,14 +133,14 @@ public class OperacionesEventHandler {
 		/* Validando Autorización */
 		ValidateAuthorization val = new ValidateAuthorization();
 		try {
-			System.out.println("REQUEST HandleAfterCreate: " + req.getMethod());
 			val.setObjectMapper(objectMapper);
 			val.setReq(req);
 			if (!val.Validate()) {
-				throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado ");
+				log.error("Fallo el Usuario Enviado no Coincide con el Autenticado");
+				throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado");
 			}
 		} catch (Exception e) {
-			System.out.println("Fallo Despues de Crear la Operación Validando Autorización: " + e.getMessage());
+			log.error("Fallo Despues de Crear la Operación Validando Autorización: " + e.getMessage());
 			throw new RuntimeException("Fallo Despues de Crear la Operación Validando Autorización: ");
 		}
 
@@ -163,8 +162,8 @@ public class OperacionesEventHandler {
 			trazasRepo.save(traza);
 
 		} catch (Exception e) {
-			System.out.println("Fallo al Insertar la Creación de la Operación en la Trazabilidad");
-			System.out.println(e.getMessage());
+			log.error("Fallo al Insertar la Creación de la Operación en la Trazabilidad");
+			log.error(e.getMessage());
 			throw new RuntimeException("Fallo al Insertar la Creación de la Operación en la Trazabilidad");
 		}
 	}
@@ -173,26 +172,24 @@ public class OperacionesEventHandler {
 	public void handleOperacionesDelete(Operaciones operaciones) {
 		try {
 			if (objRepo.existsByOperaciones(operaciones)) {
-				log.info("Esta operación tiene dependencias");
+				log.error("Fallo, la operación tiene objetivos relacionados.");
 				throw new RuntimeException("Fallo, la operación tiene objetivos relacionados.");
 			}
-			throw new RuntimeException("Fallo, la operación puede ser borrada ");
 		} catch (Exception e) {
 			if (e.getMessage().contains("Fallo")) {
+				log.error("Fallo, la operación tiene objetivos relacionados.");
 				throw new RuntimeException(e.getMessage());
 			}
+			log.error("Fallo buscando relaciones con objetivos.");
 			throw new RuntimeException("Fallo buscando relaciones con objetivos.");
 		}
 
-		// try {
-		// traccar.borrar(operaciones);
-		// } catch (Exception e) {
-		// log.error("Fallo Eliminando Grupo en Traccar " + e.getMessage());
-		// throw new RuntimeException("Fallo Eliminando Grupo en Traccar ");
-		// }
-
-		// long idoperacion = operaciones.getId();
-		// System.out.println("id operacion: " + idoperacion);
+		try {
+			traccar.borrar(operaciones);
+		} catch (Exception e) {
+			log.error("Fallo eliminando grupo en las apis externas " + e.getMessage());
+			throw new RuntimeException("Fallo eliminando grupo en las apis externas");
+		}
 	}
 
 	@HandleAfterDelete
@@ -200,20 +197,19 @@ public class OperacionesEventHandler {
 		/* Validando Autorización */
 		ValidateAuthorization val = new ValidateAuthorization();
 		try {
-			System.out.println("REQUEST HandleAfterDelete: " + req.getMethod());
 			val.setObjectMapper(objectMapper);
 			val.setReq(req);
 			if (!val.Validate()) {
+				log.error("Fallo el Usuario Enviado no Coincide con el Autenticado ");
 				throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado ");
 			}
 		} catch (Exception e) {
-			System.out.println("Fallo Despues de Eliminar la Operación Validando Autorización: " + e.getMessage());
+			log.error("Fallo Despues de Eliminar la Operación Validando Autorización: " + e.getMessage());
 			throw new RuntimeException(
 					"Fallo Despues de Eliminar la Operación Validando Autorización: " + e.getMessage());
 		}
 
 		try {
-			System.out.println("Eliminar la Baliza en la Trazabilidad AfterDelete");
 			Trazas traza = new Trazas();
 			AccionEntidad accion = new AccionEntidad();
 			Usuarios usuario = new Usuarios();
@@ -231,8 +227,8 @@ public class OperacionesEventHandler {
 			trazasRepo.save(traza);
 
 		} catch (Exception e) {
-			System.out.println("Fallo al Insertar la Eliminación de la Operación en la Trazabilidad");
-			System.out.println(e.getMessage());
+			log.error("Fallo al Insertar la Eliminación de la Operación en la Trazabilidad");
+			log.error(e.getMessage());
 			throw new RuntimeException("Fallo al Insertar la Eliminación de la Operación en la Trazabilidad");
 		}
 	}
@@ -244,28 +240,28 @@ public class OperacionesEventHandler {
 		try {
 			con = conRepo.buscarFtp("FTP").get(0);
 		} catch (Exception e) {
-			System.out.println("Fallo al buscar la conexión al ftp en la BD");
-			System.out.println(e.getMessage());
+			log.error("Fallo al buscar la conexión al ftp en la BD");
+			log.error(e.getMessage());
 			throw new IOException(
 					"Fallo al buscar la conexión al ftp en la BD");
 		}
 
 		if (con != null) {
-			System.out.println("Con Servicio: " + con.getServicio());
+			log.info("Con Servicio: " + con.getServicio());
 			try {
 				ftp.connect(con.getIpServicio(),
 						Integer.parseInt(((!Strings.isNullOrEmpty(con.getPuerto())) ? con.getPuerto() : "21")));
-				System.out.println("FTP con: " + con.getServicio() + " :" + con.getPuerto());
+				log.info("FTP con: " + con.getServicio() + " :" + con.getPuerto());
 			} catch (Exception e) {
-				System.out.println("Conexión Fallida al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
-				System.out.println(e.getMessage());
+				log.error("Conexión Fallida al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
+				log.error(e.getMessage());
 				throw new IOException(
 						"Conexión Fallida al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
 			}
 			int reply = ftp.getReplyCode();
 			if (!FTPReply.isPositiveCompletion(reply)) {
 				ftp.disconnect();
-				System.out.println("getReplyCode: Conexión Fallida al servidor FTP " + con.getIpServicio() + ":"
+				log.error("getReplyCode: Conexión Fallida al servidor FTP " + con.getIpServicio() + ":"
 						+ con.getPuerto());
 				throw new IOException(
 						"Conexión Fallida al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
@@ -273,10 +269,9 @@ public class OperacionesEventHandler {
 
 			try {
 				ftp.login(con.getUsuario(), con.getPassword());
-				System.out.println("CREDENCIALES: " + con.getUsuario() + " :: " + con.getPassword());
 			} catch (Exception e) {
 				Desconectar(ftp);
-				System.out.println("Usuario o Contraseña Incorrecto, al Intentar Autenticarse en Servidor FTP ");
+				log.error("Usuario o Contraseña Incorrecto, al Intentar Autenticarse en Servidor FTP ");
 				throw new IOException("Usuario o Contraseña Incorrecto, al Intentar Autenticarse en Servidor FTP "
 						+ con.getIpServicio() + ":" + con.getPuerto());
 			}
@@ -296,9 +291,6 @@ public class OperacionesEventHandler {
 
 				String carpetaUnidad = uni.getDenominacion();
 				String carpetaOperacion = op.getDescripcion();
-				System.out.println("CREANDO CARPETAS:: " + uni.getDenominacion() + "-" + op.getDescripcion());
-				System.out.println("Carpeta " + carpetaUnidad);
-				System.out.println("Carpeta " + carpetaOperacion);
 				String fechaI = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaInicio());
 				String fechaF = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaFin());
 
@@ -312,46 +304,43 @@ public class OperacionesEventHandler {
 							+ carpetaOperacion);
 					ftp.mkd(currentDir + "/" + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion + "/PERSONALIZADOS");
-					System.out.println(currentDir + "/" + carpetaUnidad + "/INFORMES "
-							+ carpetaOperacion + "/PERSONALIZADOS");
 				} catch (Exception e) {
 					Desconectar(ftp);
-					System.out.println("Fallo creando Primera Carpeta " + e.getMessage());
+					log.error("Fallo creando Primera Carpeta " + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 				try {
 					ftp.changeWorkingDirectory(
 							currentDir + "/" + carpetaUnidad + "/INFORMES " + carpetaOperacion);
-					System.out.println("Directorio actual: " + currentDir);
 					ftp.mkd("FIRMADOS");
 				} catch (Exception e) {
 					Desconectar(ftp);
-					System.out.println("Fallo creando segunda Carpeta FIRMADOS" + e.getMessage());
+					log.error("Fallo creando segunda Carpeta FIRMADOS" + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 				try {
 					ftp.mkd("ORIGINALES");
 				} catch (Exception e) {
 					Desconectar(ftp);
-					System.out.println("Fallo creando Carpeta ORIGINALES" + e.getMessage());
+					log.error("Fallo creando Carpeta ORIGINALES" + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 				try {
 					ftp.mkd("PENDIENTES DE FIRMA");
 				} catch (Exception e) {
 					Desconectar(ftp);
-					System.out.println("Fallo creando Carpeta PENDIENTES DE FIRMA " + e.getMessage());
+					log.error("Fallo creando Carpeta PENDIENTES DE FIRMA " + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 
 				Desconectar(ftp);
 			} catch (Exception e) {
-				System.out.println("Fallo, Creando Estructura de Directorios para la Operación " + e.getMessage());
+				log.error("Fallo, Creando Estructura de Directorios para la Operación " + e.getMessage());
 				Desconectar(ftp);
 				throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 			}
 		} else {
-			throw new Exception("No Existe un Servicio entre las Conexiones, que Contenga la Palabra FTP");
+			throw new Exception("No existe un servicio FTP, entre las conexiones");
 		}
 	}
 
@@ -362,7 +351,7 @@ public class OperacionesEventHandler {
 				ftp.disconnect();
 			}
 		} catch (IOException e) {
-			System.out.println("Fallo Desconectando FTP: " + e.getMessage());
+			log.error("Fallo Desconectando FTP: " + e.getMessage());
 			throw new RuntimeException("Fallo Desconectando FTP");
 		}
 	}
