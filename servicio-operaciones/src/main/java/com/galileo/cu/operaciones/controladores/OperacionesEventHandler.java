@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import javax.persistence.EntityManager;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.net.ftp.FTPClient;
@@ -12,8 +13,10 @@ import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
 import org.springframework.data.rest.core.annotation.HandleAfterDelete;
+import org.springframework.data.rest.core.annotation.HandleAfterSave;
 import org.springframework.data.rest.core.annotation.HandleBeforeCreate;
 import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
+import org.springframework.data.rest.core.annotation.HandleBeforeSave;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +69,9 @@ public class OperacionesEventHandler {
 
 	@Autowired
 	ObjetivosRepository objRepo;
+
+	@Autowired
+	EntityManager entMg;
 
 	public OperacionesEventHandler(HttpServletRequest request) {
 		this.req = request;
@@ -165,6 +171,84 @@ public class OperacionesEventHandler {
 			log.error("Fallo al Insertar la Creación de la Operación en la Trazabilidad");
 			log.error(e.getMessage());
 			throw new RuntimeException("Fallo al Insertar la Creación de la Operación en la Trazabilidad");
+		}
+	}
+
+	@HandleBeforeSave
+	public void handleOperacionesBeforeUpdate(Operaciones operaciones) {
+		/* Validando Autorización */
+		ValidateAuthorization val = new ValidateAuthorization();
+		try {
+			val.setObjectMapper(objectMapper);
+			val.setReq(req);
+			if (!val.Validate()) {
+				log.error("Fallo el Usuario Enviado no Coincide con el Autenticado");
+				throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado");
+			}
+		} catch (Exception e) {
+			log.error("Fallo antes de editar la operación validando autorización: " + e.getMessage());
+			throw new RuntimeException("Fallo antes de editar la operación validando autorización");
+		}
+
+		entMg.detach(operaciones);
+
+		Operaciones opTmp = operacionesrepo.findById(operaciones.getId()).get();
+
+		if (operaciones.getIdGrupo() == null && opTmp.getIdGrupo() != null)
+			operaciones.setIdGrupo(opTmp.getIdGrupo());
+
+		if (operaciones.getIdDataminer() == null && opTmp.getIdDataminer() != null)
+			operaciones.setIdDataminer(opTmp.getIdDataminer());
+
+		if (operaciones.getIdElement() == null && opTmp.getIdElement() != null)
+			operaciones.setIdElement(opTmp.getIdElement());
+
+		if (operaciones.getIdGrupo() == null || operaciones.getIdDataminer() == null
+				|| operaciones.getIdElement() == null) {
+			String err = "Fallo, los id relacionados con Dataminer y Traccar deben tener valor";
+			log.error(err);
+			throw new RuntimeException(err);
+		}
+
+	}
+
+	@HandleAfterSave
+	public void handleOperacionesAfterUpdate(Operaciones operaciones) {
+		/* Validando Autorización */
+		ValidateAuthorization val = new ValidateAuthorization();
+		try {
+			val.setObjectMapper(objectMapper);
+			val.setReq(req);
+			if (!val.Validate()) {
+				log.error("Fallo el Usuario Enviado no Coincide con el Autenticado");
+				throw new RuntimeException("Fallo el Usuario Enviado no Coincide con el Autenticado");
+			}
+		} catch (Exception e) {
+			log.error("Fallo antes de editar la operación validando autorización: " + e.getMessage());
+			throw new RuntimeException("Fallo antes de editar la operación validando autorización");
+		}
+
+		try {
+			Trazas traza = new Trazas();
+			AccionEntidad accion = new AccionEntidad();
+			Usuarios usuario = new Usuarios();
+			TipoEntidad entidad = new TipoEntidad();
+
+			entidad.setId(6);
+			accion.setId(3);
+			usuario.setId(Long.parseLong(val.getJwtObjectMap().getId()));
+
+			traza.setAccionEntidad(accion);
+			traza.setTipoEntidad(entidad);
+			traza.setUsuario(usuario);
+			traza.setIdEntidad(operaciones.getId().intValue());
+			traza.setDescripcion("Fue Modificada la Operación: " + operaciones.getDescripcion());
+			trazasRepo.save(traza);
+
+		} catch (Exception e) {
+			String err = "Fallo al Insertar la modificación de la operación en la Trazabilidad";
+			log.error(err, e);
+			throw new RuntimeException(err);
 		}
 	}
 
