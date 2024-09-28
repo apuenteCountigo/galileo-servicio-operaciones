@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.apache.tomcat.jni.Error;
 import org.apache.commons.net.ftp.FTPFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.core.annotation.HandleAfterCreate;
@@ -115,8 +116,9 @@ public class OperacionesEventHandler {
 				}
 			} else if (e.getMessage().contains(" es nulo") ||
 					e.getMessage().contains("Fallo")) {
-				log.error(e.getMessage());
-				throw new RuntimeException(e.getMessage());
+				String err = "Fallo, creando operación, en las apis externas. VER LOGS.";
+				log.error(err, e.getMessage());
+				throw new RuntimeException(err);
 			} else {
 				String err = "Fallo creando operación en apis externas, VER LOGS.";
 				log.error(err, e.getMessage());
