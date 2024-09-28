@@ -71,6 +71,8 @@ public class OperacionesEventHandler {
 	@HandleBeforeCreate
 	public void handleOperacionesCreate(Operaciones operaciones) {
 		this.req.setAttribute("operaciones", operaciones);
+		this.req.setAttribute("handleBeforeCreate", false);
+		this.req.setAttribute("handleAfterCreate", false);
 
 		/* Validando Autorización */
 		ValidateAuthorization val = new ValidateAuthorization();
@@ -125,6 +127,7 @@ public class OperacionesEventHandler {
 				throw new RuntimeException(err);
 			}
 		}
+		this.req.setAttribute("handleBeforeCreate", true);
 	}
 
 	@HandleAfterCreate
@@ -165,6 +168,7 @@ public class OperacionesEventHandler {
 			log.info(e.getMessage());
 			throw new RuntimeException("Fallo al Insertar la Creación de la Operación en la Trazabilidad");
 		}
+		this.req.setAttribute("handleAfterCreate", true);
 	}
 
 	@HandleBeforeDelete

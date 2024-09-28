@@ -147,6 +147,14 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 
 		// Recuperar el objeto Operaciones desde los atributos de la solicitud
 		Operaciones operaciones = (Operaciones) request.getAttribute("operaciones");
+		boolean handleBeforeCreate = (boolean) request.getAttribute("handleBeforeCreate");
+		boolean handleAfterCreate = (boolean) request.getAttribute("handleAfterCreate");
+
+		if (handleBeforeCreate)
+			log.info("handleBeforeCreate==true");
+
+		if (handleAfterCreate)
+			log.info("handleAfterCreate==true");
 
 		if (ex != null) {
 			log.error("Operación = {}", operaciones.getDescripcion());
