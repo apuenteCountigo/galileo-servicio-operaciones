@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.galileo.cu.commons.models.Operaciones;
 
-@FeignClient(name="servicio-apis")
+@FeignClient(name = "servicio-apis")
 public interface TraccarFeign {
 
 	@PostMapping("/salvarOperacionDataMiner")
@@ -17,7 +17,7 @@ public interface TraccarFeign {
 
 	@PostMapping("/estadoEnvioNombZip")
 	public String estadoZip(@RequestParam Integer idDataminer, @RequestParam Integer idElement);
-	
+
 	@DeleteMapping("/borrarOperacionDataMiner")
 	String borrar(@RequestBody Operaciones operacion);
 }

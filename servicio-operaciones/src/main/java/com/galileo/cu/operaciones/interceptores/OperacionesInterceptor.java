@@ -3,6 +3,7 @@ package com.galileo.cu.operaciones.interceptores;
 import com.galileo.cu.commons.models.Operaciones;
 import com.galileo.cu.commons.models.dto.JwtObjectMap;
 import com.galileo.cu.commons.models.dto.OriginCascading;
+import com.galileo.cu.operaciones.cliente.TraccarFeign;
 import com.galileo.cu.operaciones.repositorios.OperacionesRepository;
 
 import java.io.ByteArrayInputStream;
@@ -31,6 +32,9 @@ import org.springframework.web.servlet.ModelAndView;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Component
 public class OperacionesInterceptor implements HandlerInterceptor {
 
@@ -40,12 +44,14 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 	@Autowired
 	private OperacionesRepository oper;
 
+	@Autowired
+	private TraccarFeign apis;
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws ServletException, IOException {
-		
-		//OriginCascading originCascading= new OriginCascading();
-		System.out.println("INTERCEPTOR***" + request.getMethod() + "*******************");
+
+		// OriginCascading originCascading= new OriginCascading();
 		/*
 		 * Enumeration<String> names = request.getHeaderNames(); while
 		 * (names.hasMoreElements()) System.out.println(names.nextElement());
@@ -55,10 +61,8 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 					|| request.getRequestURI().equals("/operaciones/search/filtrar")
 					|| request.getRequestURI().equals("/operaciones/search/filtrarPorUsuario")) {
 
-				System.out.println(request.getHeader("Authorization"));
 				if (!Strings.isNullOrEmpty(request.getHeader("Authorization"))) {
 					String token = request.getHeader("Authorization").replace("Bearer ", "");
-					System.out.println(token.toString());
 
 					try {
 						String[] chunks = token.split("\\.");
@@ -66,47 +70,45 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 						String header = new String(decoder.decode(chunks[0]));
 						String payload = new String(decoder.decode(chunks[1]));
 
-						System.out.println(payload.toString());
-
-						JwtObjectMap jwtObjectMap = objectMapper.readValue(payload.toString().replace("Perfil", "perfil"),
+						JwtObjectMap jwtObjectMap = objectMapper.readValue(
+								payload.toString().replace("Perfil", "perfil"),
 								JwtObjectMap.class);
-						System.out.println(jwtObjectMap.getId());
 
-						System.out.println("Path:" + request.getRequestURI());
-						System.out.println("Descripcion:" + jwtObjectMap.getPerfil().getDescripcion());
 						if (jwtObjectMap.getPerfil().getDescripcion().equals("Usuario Final")
 								|| jwtObjectMap.getPerfil().getDescripcion().equals("Invitado Externo")) {
-							System.out.println("-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*");
 							if (jwtObjectMap.getId().equals(request.getParameter("idAuth"))) {
 								return true;
 							} else {
-								System.out.println("EL USUARIO ENVIADO NO COINCIDE CON EL AUTENTICADO");
-								response=Msg(response,"{\"errorMessage\":\"EL USUARIO ENVIADO NO COINCIDE CON EL AUTENTICADO! Servicio-Operaciones\"}");
+								log.error("Fallo, el usuario no coincide con el autenticado");
+								response = Msg(response,
+										"{\"errorMessage\":\"Fallo, el usuario no coincide con el autenticado\"}");
 								return false;
 							}
 						}
 					} catch (Exception e) {
-						System.out.println("NO HAY TOKEN");
-						response=Msg(response,"{\"errorMessage\":\"ERROR en Interceptor de Seguriad Servicio-Operaciones\",\"errorOficial\":\""
-								+ e.getMessage() + "\"}");
+						log.error("Fallo en Interceptor de Seguriad Servicio-Operaciones", e.getMessage());
+						response = Msg(response,
+								"{\"errorMessage\":\"Fallo en Interceptor de Seguriad Servicio-Operaciones\"}");
 						return false;
 					}
 				} else {
-					System.out.println("NO HAY TOKEN");
+					log.error("Fallo, no existe token");
 					return false;
 				}
 			}
-		}else if (request.getMethod().equals("DELETE")) {
-			/*System.out.println("INTO DELETE");
-			String s=IOUtils.toString(request.getReader());
-			if (s != null && s != "") {
-				System.out.println("getReader");
-				System.out.println(s);
-				originCascading= objectMapper.readValue(s,OriginCascading.class) ;
-				System.out.println("OriginCascading="+originCascading.origin);
-			}else {
-				System.out.println("Body null");
-			}*/
+		} else if (request.getMethod().equals("DELETE")) {
+			/*
+			 * System.out.println("INTO DELETE");
+			 * String s=IOUtils.toString(request.getReader());
+			 * if (s != null && s != "") {
+			 * System.out.println("getReader");
+			 * System.out.println(s);
+			 * originCascading= objectMapper.readValue(s,OriginCascading.class) ;
+			 * System.out.println("OriginCascading="+originCascading.origin);
+			 * }else {
+			 * System.out.println("Body null");
+			 * }
+			 */
 		}
 		return true;// HandlerInterceptor.super.preHandle(request, response, handler);
 	}
@@ -122,9 +124,9 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 			res.getOutputStream().write(s.getBytes("UTF-8"));
 			res.flushBuffer();
 		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException("ERROR, Construyendo Respuesta Interceptor Operaciones");
+			throw new RuntimeException("Fallo, Construyendo Respuesta Interceptor Operaciones");
 		} catch (IOException e) {
-			throw new RuntimeException("ERROR, Construyendo Respuesta Interceptor Operaciones");
+			throw new RuntimeException("Fallo, Construyendo Respuesta Interceptor Operaciones");
 		}
 
 		return res;
@@ -142,14 +144,14 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex)
 			throws Exception {
 		// HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+
+		// Recuperar el objeto Operaciones desde los atributos de la solicitud
+		Operaciones operaciones = (Operaciones) request.getAttribute("operaciones");
+
 		if (ex != null) {
-			System.out.println("**********------OCURRIO UN ERROR");
-			// response=Msg(response,"{\"errorMessage\":\"DETECTANDO MIS ERRORES!
-			// Servicio-Operaciones\"}");
-		} else {
-			System.out.println("!!!!!!!------NO OCURRIO UN ERROR");
+			log.error("Operación = {}", operaciones.getDescripcion());
+			log.error("**********afterCompletion Detectando errores en el servicio", ex.getMessage());
+			// apis.borrar(operaciones);
 		}
 	}
-	
-	
 }

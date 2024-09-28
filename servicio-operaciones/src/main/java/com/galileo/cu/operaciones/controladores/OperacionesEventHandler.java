@@ -73,6 +73,8 @@ public class OperacionesEventHandler {
 
 	@HandleBeforeCreate
 	public void handleOperacionesCreate(Operaciones operaciones) {
+		this.req.setAttribute("operaciones", operaciones);
+
 		/* Validando Autorización */
 		ValidateAuthorization val = new ValidateAuthorization();
 		try {
@@ -118,18 +120,22 @@ public class OperacionesEventHandler {
 			log.info("**** servidor=" + operaciones.getServidor().getServicio());
 		} catch (Exception e) {
 			if (e.getMessage().contains("ya existe una operacion")) {
-				log.info("CONTIENE, ya existe una operacion ");
+				log.error("CONTIENE, ya existe una operacion ");
 				if (e.getMessage().contains("DATAMINER")) {
-					log.info("Fallo Insertando Grupo en DATAMINER " + e.getMessage());
+					log.error("Fallo Insertando Grupo en DATAMINER " + e.getMessage());
 					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
 				} else if (e.getMessage().contains("Traccar")) {
-					log.info("Fallo Insertando Grupo en Traccar " + e.getMessage());
+					log.error("Fallo Insertando Grupo en Traccar " + e.getMessage());
 					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
 				}
+			} else if (e.getMessage().contains(" es nulo") ||
+					e.getMessage().contains("Fallo")) {
+				log.error(e.getMessage());
+				throw new RuntimeException(e.getMessage());
 			} else {
-				log.info("NO CONTIENE, ya existe una operacion ");
-				log.info("Fallo Insertando Grupo en DATAMINER " + e.getMessage());
-				throw new RuntimeException("Fallo, Insertando Grupo en DATAMINER, VER LOGS");
+				String err = "Fallo creando operación en apis externas, VER LOGS.";
+				log.error(err, e.getMessage());
+				throw new RuntimeException(err);
 			}
 		}
 	}
