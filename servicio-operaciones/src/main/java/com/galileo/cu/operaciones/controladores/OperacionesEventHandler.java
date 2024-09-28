@@ -86,17 +86,6 @@ public class OperacionesEventHandler {
 		}
 
 		try {
-			// this.orquestador.iniciarCreacionOperacion(operaciones);
-			if (operaciones != null) {
-				// this.orquestador.sendErrorNotification();
-				throw new RuntimeException("Fallo Antes de Crear la Operación iniciando orquestador ");
-			}
-		} catch (Exception e) {
-			throw new RuntimeException("Fallo al iniciarCreacionOperacion: " +
-					e.getMessage());
-		}
-
-		try {
 			CrearDirectorios(operaciones);
 		} catch (Exception e) {
 			log.info("Fallo Creando Directorios para Evidencias");
