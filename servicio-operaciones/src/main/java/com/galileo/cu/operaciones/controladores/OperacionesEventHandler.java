@@ -28,7 +28,6 @@ import com.galileo.cu.commons.models.Usuarios;
 import com.galileo.cu.operaciones.repositorios.PermisosRepository;
 import com.galileo.cu.operaciones.repositorios.TrazasRepository;
 import com.galileo.cu.operaciones.repositorios.UnidadesRepository;
-// import com.galileo.cu.operaciones.servicios.OperacionesOrquestador;
 import com.google.common.base.Strings;
 
 import lombok.extern.slf4j.Slf4j;
@@ -63,9 +62,6 @@ public class OperacionesEventHandler {
 
 	@Autowired
 	ConexionesRepository conRepo;
-
-	// @Autowired
-	// private OperacionesOrquestador orquestador;
 
 	public OperacionesEventHandler(HttpServletRequest request) {
 		this.req = request;

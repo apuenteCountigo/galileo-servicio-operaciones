@@ -98,19 +98,6 @@
 			<artifactId>commons-net</artifactId>
 			<version>3.6</version>
 		</dependency>
-
-		<!-- Dependencia principal de Kafka -->
-		<!-- <dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
-		</dependency> -->
-
-		<!-- Dependencia para pruebas con Kafka -->
-		<!-- <dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka-test</artifactId>
-			<scope>test</scope>
-		</dependency> -->
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
