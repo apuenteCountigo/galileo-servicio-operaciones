@@ -150,13 +150,13 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		operaciones = (Operaciones) request.getAttribute("operaciones");
 		boolean handleBeforeCreate = (boolean) request.getAttribute("handleBeforeCreate") || false;
 		boolean handleAfterCreate = (boolean) request.getAttribute("handleAfterCreate") || false;
-		boolean handleBD = (boolean) request.getAttribute("handleBD") || false;
+		String handleBD = request.getAttribute("handleBD").toString();
 
 		if (handleBeforeCreate)
 			log.info("handleBeforeCreate==true");
 
-		if (handleBD)
-			log.info("handleBD==true");
+		if (!Strings.isNullOrEmpty(handleBD))
+			log.info("handleBD=={}", handleBD);
 
 		if (handleAfterCreate)
 			log.info("handleAfterCreate==true");
@@ -165,7 +165,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 			// log.error("Operación = {}", operaciones.getDescripcion());
 			log.error("**********afterCompletion Detectando errores en el servicio", ex.getMessage());
 
-			if (handleBeforeCreate && !handleBD) {
+			if (handleBeforeCreate && handleBD.equals("false")) {
 				try {
 					log.info("Ejecutando rollback operaciones, por fallo en BD.");
 					apis.borrar(operaciones);
