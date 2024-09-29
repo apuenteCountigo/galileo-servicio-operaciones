@@ -167,7 +167,9 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 
 			if (handleBeforeCreate && !handleBD) {
 				try {
+					log.info("Ejecutando rollback operaciones, por fallo en BD.");
 					apis.borrar(operaciones);
+					log.info("Fué ejeuctado rollback operaciones, por fallo en BD.");
 				} catch (Exception e) {
 					String err = "Fallo intentando eliminar la operación en las apis externas, debido a fallo intentando insertar operación en la BD.";
 					log.error(err);
