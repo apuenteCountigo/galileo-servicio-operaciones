@@ -14,18 +14,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGeneralException(Exception ex) {
         if (ex.getMessage().contains("Fallo") || ex.getMessage().contains(" es nulo")) {
-            return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("{\"message\":\"" + ex.getMessage() + "\"}", HttpStatus.INTERNAL_SERVER_ERROR);
         } else if (ex.getMessage().contains("could not execute statement;")) {
             if (ex.getMessage().contains("constraint [uk_nombre_idUnidad];")) {
-                String err = "Fallo, ya existe una operación con este nombre, en esta unidad.";
+                String err = "{\"message\":\"Fallo, ya existe una operación con este nombre, en esta unidad.\"}";
                 log.error(err, ex);
-                throw new RuntimeException(err);
-                // return new ResponseEntity<>(err,HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(err, HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
         // Personaliza el mensaje de error
         log.error(ex.getMessage());
-        return new ResponseEntity<>("Ocurrió un error inesperado",
+        return new ResponseEntity<>("{\"message\":\"Ocurrió un error inesperado\"}",
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

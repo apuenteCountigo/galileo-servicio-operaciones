@@ -168,7 +168,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 				log.info("Fué ejeuctado rollback operaciones, por fallo en BD.");
 			} catch (Exception e) {
 				String err = "Fallo intentando eliminar la operación en las apis externas, debido a fallo intentando insertar operación en la BD.";
-				log.error(err);
+				log.error(err, e);
 			}
 		}
 
