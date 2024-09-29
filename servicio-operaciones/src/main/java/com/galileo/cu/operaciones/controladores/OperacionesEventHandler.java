@@ -129,7 +129,7 @@ public class OperacionesEventHandler {
 			}
 		}
 		this.req.setAttribute("handleBeforeCreate", true);
-		if (Strings.isNullOrEmpty(operaciones.getDescripcion()) && operaciones.getDescripcion() == "BDFail")
+		if (!Strings.isNullOrEmpty(operaciones.getDescripcion()) && operaciones.getDescripcion().equals("BDFail"))
 			operaciones.setDescripcion("OPEVI");
 	}
 
