@@ -19,8 +19,8 @@ public class GlobalExceptionHandler {
             if (ex.getMessage().contains("constraint [uk_nombre_idUnidad];")) {
                 String err = "Fallo, ya existe una operación con este nombre, en esta unidad.";
                 log.error(err, ex);
-                return new ResponseEntity<>(err,
-                        HttpStatus.INTERNAL_SERVER_ERROR);
+                throw new RuntimeException(err);
+                // return new ResponseEntity<>(err,HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
         // Personaliza el mensaje de error
