@@ -146,18 +146,23 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		// HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
 
 		// Recuperar el objeto Operaciones desde los atributos de la solicitud
-		Operaciones operaciones = (Operaciones) request.getAttribute("operaciones");
-		boolean handleBeforeCreate = (boolean) request.getAttribute("handleBeforeCreate");
-		boolean handleAfterCreate = (boolean) request.getAttribute("handleAfterCreate");
+		Operaciones operaciones = null;
+		operaciones = (Operaciones) request.getAttribute("operaciones");
+		boolean handleBeforeCreate = (boolean) request.getAttribute("handleBeforeCreate") || false;
+		boolean handleAfterCreate = (boolean) request.getAttribute("handleAfterCreate") || false;
+		boolean handleBD = (boolean) request.getAttribute("handleBD") || false;
 
 		if (handleBeforeCreate)
 			log.info("handleBeforeCreate==true");
+
+		if (handleBD)
+			log.info("handleBD==true");
 
 		if (handleAfterCreate)
 			log.info("handleAfterCreate==true");
 
 		if (ex != null) {
-			log.error("Operación = {}", operaciones.getDescripcion());
+			// log.error("Operación = {}", operaciones.getDescripcion());
 			log.error("**********afterCompletion Detectando errores en el servicio", ex.getMessage());
 			// apis.borrar(operaciones);
 		}

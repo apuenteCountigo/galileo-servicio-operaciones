@@ -72,6 +72,7 @@ public class OperacionesEventHandler {
 	public void handleOperacionesCreate(Operaciones operaciones) {
 		this.req.setAttribute("operaciones", operaciones);
 		this.req.setAttribute("handleBeforeCreate", false);
+		this.req.setAttribute("handleBD", false);
 		this.req.setAttribute("handleAfterCreate", false);
 
 		/* Validando Autorización */
@@ -132,6 +133,7 @@ public class OperacionesEventHandler {
 
 	@HandleAfterCreate
 	public void handleOperacionesAfterCreate(Operaciones operaciones) {
+		this.req.setAttribute("handleBD", true);
 		/* Validando Autorización */
 		ValidateAuthorization val = new ValidateAuthorization();
 		try {
