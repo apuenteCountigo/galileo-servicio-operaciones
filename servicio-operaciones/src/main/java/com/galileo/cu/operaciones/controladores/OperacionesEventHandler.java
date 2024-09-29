@@ -117,6 +117,10 @@ public class OperacionesEventHandler {
 					log.error("Fallo Insertando Grupo en Traccar " + e.getMessage());
 					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
 				}
+			} else if (e.getMessage().contains("se ha excedido la cantidad de elementos en el DataMiner")) {
+				String err = "Fallo, se ha excedido la cantidad de elementos en el servidor DMA.";
+				log.error(err, e.getMessage());
+				throw new RuntimeException(err);
 			} else if (e.getMessage().contains(" es nulo") ||
 					e.getMessage().contains("Fallo")) {
 				String err = "Fallo, creando operación, en las apis externas. VER LOGS.";
