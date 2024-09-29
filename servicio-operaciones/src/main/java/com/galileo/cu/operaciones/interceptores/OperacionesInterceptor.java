@@ -164,7 +164,15 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		if (ex != null) {
 			// log.error("Operación = {}", operaciones.getDescripcion());
 			log.error("**********afterCompletion Detectando errores en el servicio", ex.getMessage());
-			// apis.borrar(operaciones);
+
+			if (handleBeforeCreate && !handleBD) {
+				try {
+					apis.borrar(operaciones);
+				} catch (Exception e) {
+					String err = "Fallo intentando eliminar la operación en las apis externas, debido a fallo intentando insertar operación en la BD.";
+					log.error(err);
+				}
+			}
 		}
 	}
 }

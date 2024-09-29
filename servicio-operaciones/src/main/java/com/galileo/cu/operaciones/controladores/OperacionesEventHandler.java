@@ -129,6 +129,8 @@ public class OperacionesEventHandler {
 			}
 		}
 		this.req.setAttribute("handleBeforeCreate", true);
+		if (Strings.isNullOrEmpty(operaciones.getDescripcion()) && operaciones.getDescripcion() == "BDFail")
+			operaciones.setDescripcion("OPEVI");
 	}
 
 	@HandleAfterCreate
@@ -204,7 +206,6 @@ public class OperacionesEventHandler {
 		}
 
 		try {
-			log.info("Eliminar la Baliza en la Trazabilidad AfterDelete");
 			Trazas traza = new Trazas();
 			AccionEntidad accion = new AccionEntidad();
 			Usuarios usuario = new Usuarios();
