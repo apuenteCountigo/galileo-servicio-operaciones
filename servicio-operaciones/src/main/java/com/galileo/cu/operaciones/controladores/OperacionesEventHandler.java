@@ -247,7 +247,7 @@ public class OperacionesEventHandler {
 	}
 
 	public String CrearDirectorios(Operaciones op) throws Exception {
-		FtpDTO ftpDto = ftpService.connectFTP(null);
+		FtpDTO ftpDto = ftpService.connectFTP();
 		String operationPath = "";
 
 		if (ftpDto.getFtp() != null && ftpDto.getFtp().isConnected()) {

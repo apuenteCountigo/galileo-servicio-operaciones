@@ -213,7 +213,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 	}
 
 	private void removeDirectoriesStruct(String operationPath) throws IOException {
-		FtpDTO ftpDto = ftpService.connectFTP(null);
+		FtpDTO ftpDto = ftpService.connectFTP();
 		// Eliminación del directorio
 		// boolean removed = ftpDto.ftp.removeDirectory(operationPath);
 		// if (removed) {
