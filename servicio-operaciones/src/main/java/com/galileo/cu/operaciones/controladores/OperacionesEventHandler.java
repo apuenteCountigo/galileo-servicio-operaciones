@@ -260,15 +260,14 @@ public class OperacionesEventHandler {
 			try {
 				uni = uniRep.findById(op.getUnidades().getId()).get();
 			} catch (Exception e) {
-				log.error("Fallo obtenidendo la unidad a la que pertenece la operación");
+				log.error("Fallo obteniendo la unidad a la que pertenece la operación");
 				log.error(e.getMessage());
-				throw new IOException("Fallo obtenidendo la unidad a la que pertenece la
-				operación");
+				throw new IOException("Fallo obteniendo la unidad a la que pertenece la operación");
 			}
 
 			boolean dirExists = ftpDto.getFtp().changeWorkingDirectory(baseDir);
 			if (!dirExists) {
-				log.error("Fallo, la ruta suministrada en la conexión ftp, no es válida");
+				log.error("Fallo, la ruta suministrada en la conexión FTP no es válida");
 				baseDir = "/";
 				ftpDto.getFtp().changeWorkingDirectory(baseDir);
 			}
@@ -276,12 +275,10 @@ public class OperacionesEventHandler {
 			try {
 				String carpetaUnidad = uni.getDenominacion();
 				String carpetaOperacion = op.getDescripcion();
-				log.info("CREANDO CARPETAS:: " + uni.getDenominacion() + "-" +
-				op.getDescripcion());
+				log.info("CREANDO CARPETAS:: " + uni.getDenominacion() + "-" + op.getDescripcion());
 				log.info("Carpeta " + carpetaUnidad);
 				log.info("Carpeta " + carpetaOperacion);
-				String fechaI = new
-				SimpleDateFormat("yyyy-MM-dd").format(op.getFechaInicio());
+				String fechaI = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaInicio());
 				String fechaF = new SimpleDateFormat("yyyy-MM-dd").format(op.getFechaFin());
 
 				String unidadesDir = baseDir + "/UNIDADES/";
@@ -289,66 +286,56 @@ public class OperacionesEventHandler {
 				try {
 					ftpDto.getFtp().mkd(unidadesDir);
 					ftpDto.getFtp().mkd(unidadesDir + carpetaUnidad);
-					ftpDto.getFtp().mkd(unidadesDir + carpetaUnidad + "/INFORMES "
-					+ carpetaOperacion);
+					ftpDto.getFtp().mkd(unidadesDir + carpetaUnidad + "/INFORMES " + carpetaOperacion);
 
-					operationPath = unidadesDir + carpetaUnidad + "/INFORMES "
-					+ carpetaOperacion;
+					operationPath = unidadesDir + carpetaUnidad + "/INFORMES " + carpetaOperacion;
 
-					ftpDto.getFtp().mkd(unidadesDir + carpetaUnidad + "/INFORMES "
-					+ carpetaOperacion + "/PERSONALIZADOS");
-					log.info(unidadesDir + carpetaUnidad + "/INFORMES "
-					+ carpetaOperacion + "/PERSONALIZADOS");
+					ftpDto.getFtp()
+							.mkd(unidadesDir + carpetaUnidad + "/INFORMES " + carpetaOperacion + "/PERSONALIZADOS");
+					log.info(unidadesDir + carpetaUnidad + "/INFORMES " + carpetaOperacion + "/PERSONALIZADOS");
 				} catch (Exception e) {
 					Desconectar(ftpDto.getFtp());
 					log.error("Fallo creando estructura de Directorios " + e.getMessage());
-					throw new Exception("Fallo Creando Estructura de Directorios para la
-					Operación");
+					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 
 				try {
 					ftpDto.getFtp()
-					.changeWorkingDirectory(unidadesDir + carpetaUnidad + "/INFORMES " +
-					carpetaOperacion);
+							.changeWorkingDirectory(unidadesDir + carpetaUnidad + "/INFORMES " + carpetaOperacion);
 					String currentDir = ftpDto.getFtp().printWorkingDirectory();
 					log.info("Directorio actual: " + currentDir);
 					ftpDto.getFtp().mkd("FIRMADOS");
 				} catch (Exception e) {
 					Desconectar(ftpDto.getFtp());
-					log.info("Fallo creando segunda Carpeta FIRMADOS" + e.getMessage());
-					throw new Exception("Fallo Creando Estructura de Directorios para la
-					Operación");
+					log.info("Fallo creando segunda Carpeta FIRMADOS " + e.getMessage());
+					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 
 				try {
 					ftpDto.getFtp().mkd("ORIGINALES");
 				} catch (Exception e) {
 					Desconectar(ftpDto.getFtp());
-					log.info("Fallo creando Carpeta ORIGINALES" + e.getMessage());
-					throw new Exception("Fallo Creando Estructura de Directorios para la
-					Operación");
+					log.info("Fallo creando Carpeta ORIGINALES " + e.getMessage());
+					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
+
 				try {
 					ftpDto.getFtp().mkd("PENDIENTES DE FIRMA");
 				} catch (Exception e) {
 					Desconectar(ftpDto.getFtp());
 					log.info("Fallo creando Carpeta PENDIENTES DE FIRMA " + e.getMessage());
-					throw new Exception("Fallo Creando Estructura de Directorios para la
-					Operación");
+					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 
 				Desconectar(ftpDto.getFtp());
 				return operationPath;
 			} catch (Exception e) {
-				log.info("Fallo, Creando Estructura de Directorios para la Operación " +
-				e.getMessage());
+				log.info("Fallo, Creando Estructura de Directorios para la Operación " + e.getMessage());
 				Desconectar(ftpDto.getFtp());
-				throw new Exception("Fallo Creando Estructura de Directorios para la
-				Operación");
+				throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 			}
 		} else {
-		throw new Exception("No Existe un Servicio entre las Conexiones, que Contenga
-		la Palabra FTP");
+			throw new Exception("No Existe un Servicio entre las Conexiones que Contenga la Palabra FTP");
 		}
 	}
 
