@@ -44,6 +44,7 @@ public class FtpService {
         if (con != null) {
             try {
                 ftp = makeFTPConnection(con);
+                log.info("RETORNANDO FtpDTO");
                 return new FtpDTO(ftp, DEFAULT_DIRECTORY);
             } catch (Exception e) {
                 if (ftp != null) {
@@ -64,6 +65,7 @@ public class FtpService {
     }
 
     private FTPClient makeFTPConnection(Conexiones con) throws IOException {
+        log.info("INICIO makeFTPConnection");
         FTPClient ftp = new FTPClient();
         try {
             int puerto = Strings.isNullOrEmpty(con.getPuerto()) ? DEFAULT_FTP_PORT : Integer.parseInt(con.getPuerto());
@@ -83,8 +85,9 @@ public class FtpService {
 
             authenticateFTP(ftp, con);
             setUpPassiveMode(ftp);
-            return ftp;
 
+            log.info("RETORNANDO FTP");
+            return ftp;
         } catch (Exception e) {
             String err = String.format("Fallo al intentar crear una conexión FTP %s:%s", con.getIpServicio(),
                     con.getPuerto());
@@ -99,6 +102,7 @@ public class FtpService {
     }
 
     private void authenticateFTP(FTPClient ftp, Conexiones con) throws IOException {
+        log.info("INICIO authenticateFTP");
         try {
             boolean successLogin = ftp.login(con.getUsuario(), con.getPassword());
             if (!successLogin) {
@@ -117,9 +121,11 @@ public class FtpService {
     }
 
     private void setUpPassiveMode(FTPClient ftp) throws IOException {
+        log.info("INICIO setUpPassiveMode");
         try {
             ftp.enterLocalPassiveMode();
             ftp.setControlKeepAliveTimeout(1000);
+            log.info("FIN setUpPassiveMode");
         } catch (Exception e) {
             String err = "Fallo al configurar el modo pasivo en la conexión FTP";
             log.error("{}", err, e);
@@ -129,6 +135,7 @@ public class FtpService {
     }
 
     private void disconnectFTP(FTPClient ftp) throws IOException {
+        log.info("INICIO disconnectFTP");
         if (ftp != null && ftp.isConnected()) {
             try {
                 ftp.logout();
