@@ -165,15 +165,18 @@ public class FtpOpService {
             for (FTPFile aFile : subFiles) {
                 String currentFileName = aFile.getName();
                 String filePath = directoryPath + "/" + currentFileName;
+                log.info("filePath={}", filePath);
                 if (currentFileName.equals(".") || currentFileName.equals("..")) {
                     // Skip parent directory and directory itself
                     continue;
                 }
                 if (aFile.isDirectory()) {
+                    log.info("isDirectory filePath={}", filePath);
                     // Remove sub directory
                     deleteDirectoryContents(ftpClient, filePath);
                     ftpClient.removeDirectory(filePath);
                 } else {
+                    log.info("filePath={}", filePath);
                     // Delete file
                     ftpClient.deleteFile(filePath);
                 }
