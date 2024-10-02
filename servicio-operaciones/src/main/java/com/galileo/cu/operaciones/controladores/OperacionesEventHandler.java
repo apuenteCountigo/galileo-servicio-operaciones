@@ -29,11 +29,13 @@ import com.galileo.cu.commons.models.Usuarios;
 import com.galileo.cu.operaciones.repositorios.PermisosRepository;
 import com.galileo.cu.operaciones.repositorios.TrazasRepository;
 import com.galileo.cu.operaciones.repositorios.UnidadesRepository;
+import com.galileo.cu.operaciones.servicios.FtpService;
 import com.google.common.base.Strings;
 
 import lombok.extern.slf4j.Slf4j;
 
 import com.galileo.cu.operaciones.cliente.TraccarFeign;
+import com.galileo.cu.operaciones.dto.FtpDTO;
 import com.galileo.cu.operaciones.repositorios.ConexionesRepository;
 import com.galileo.cu.operaciones.repositorios.OperacionesRepository;
 
@@ -64,6 +66,9 @@ public class OperacionesEventHandler {
 	@Autowired
 	ConexionesRepository conRepo;
 
+	@Autowired
+	FtpService ftpService;
+
 	public OperacionesEventHandler(HttpServletRequest request) {
 		this.req = request;
 	}
@@ -74,6 +79,9 @@ public class OperacionesEventHandler {
 		this.req.setAttribute("handleBeforeCreate", false);
 		this.req.setAttribute("handleBD", "false");
 		this.req.setAttribute("handleAfterCreate", false);
+		this.req.setAttribute("operationPath", "");
+
+		String operationPath = "";
 
 		/* Validando Autorización */
 		ValidateAuthorization val = new ValidateAuthorization();
@@ -90,7 +98,7 @@ public class OperacionesEventHandler {
 		}
 
 		try {
-			CrearDirectorios(operaciones);
+			operationPath = CrearDirectorios(operaciones);
 		} catch (Exception e) {
 			log.info("Fallo Creando Directorios para Evidencias");
 			log.info(e.getMessage());
@@ -100,6 +108,9 @@ public class OperacionesEventHandler {
 				throw new RuntimeException("Fallo Creando Directorios para Evidencias");
 			}
 		}
+
+		if (!Strings.isNullOrEmpty(operationPath))
+			this.req.setAttribute("operationPath", operationPath);
 
 		try {
 			Operaciones operacionesUpdate = traccar.salvar(operaciones);
@@ -132,7 +143,9 @@ public class OperacionesEventHandler {
 				throw new RuntimeException(err);
 			}
 		}
+
 		this.req.setAttribute("handleBeforeCreate", true);
+
 		if (!Strings.isNullOrEmpty(operaciones.getDescripcion()) && operaciones.getDescripcion().equals("BDFail"))
 			operaciones.setDescripcion("OPEVI");
 	}
@@ -233,57 +246,14 @@ public class OperacionesEventHandler {
 		}
 	}
 
-	public void CrearDirectorios(Operaciones op) throws Exception {
-		FTPClient ftp = new FTPClient();
-		Conexiones con = new Conexiones();
+	public String CrearDirectorios(Operaciones op) throws Exception {
+		FtpDTO ftpDto = ftpService.connectFTP(null);
+		String operationPath = "";
 
-		try {
-			con = conRepo.buscarFtp("FTP").get(0);
-		} catch (Exception e) {
-			log.error("Fallo al buscar la conexión al ftp en la BD");
-			log.error(e.getMessage());
-			throw new IOException(
-					"Fallo al buscar la conexión al ftp en la BD");
-		}
-
-		if (con != null) {
-			log.info("Con Servicio: " + con.getServicio());
-			try {
-				ftp.connect(con.getIpServicio(),
-						Integer.parseInt(((!Strings.isNullOrEmpty(con.getPuerto())) ? con.getPuerto() : "21")));
-				log.info("FTP con: " + con.getServicio() + " :" + con.getPuerto());
-			} catch (Exception e) {
-				log.error(
-						"Fallo al intentar conectarse al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
-				log.error(e.getMessage());
-				throw new IOException(
-						"Fallo al intentar conectarse al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
-			}
-			int reply = ftp.getReplyCode();
-			if (!FTPReply.isPositiveCompletion(reply)) {
-				ftp.disconnect();
-				log.error("getReplyCode: Conexión Fallida al servidor FTP " + con.getIpServicio() + ":"
-						+ con.getPuerto());
-				throw new IOException(
-						"Fallo al intentar conectarse al servidor FTP " + con.getIpServicio() + ":" + con.getPuerto());
-			}
-
-			log.info("CREDENCIALES: " + con.getUsuario() + " :: " + con.getPassword());
-			boolean successLogin = ftp.login(con.getUsuario(), con.getPassword());
-			int replyCode = ftp.getReplyCode();
-			log.info("replyCode");
-			log.info("" + replyCode);
-			if (successLogin) {
-				log.info("La autenticación fue satizfactoria.");
-			} else {
-				log.info("Fallo intentando la autenticación con el servidor ftp");
-				Desconectar(ftp);
-				throw new IOException("Fallo intentando la autenticación con el servidor ftp");
-			}
-
+		if (ftpDto.getFtp() != null && ftpDto.getFtp().isConnected()) {
 			String baseDir = "/";
-			if (con.getRuta() != null && con.getRuta() != "") {
-				baseDir = con.getRuta();
+			if (Strings.isNullOrEmpty(ftpDto.getRuta())) {
+				baseDir = ftpDto.getRuta();
 			}
 
 			Unidades uni = null;
@@ -295,11 +265,11 @@ public class OperacionesEventHandler {
 				throw new IOException("Fallo obtenidendo la unidad a la que pertenece la operación");
 			}
 
-			boolean dirExists = ftp.changeWorkingDirectory(baseDir);
+			boolean dirExists = ftpDto.getFtp().changeWorkingDirectory(baseDir);
 			if (!dirExists) {
 				log.error("Fallo, la ruta suministrada en la conexión ftp, no es válida");
 				baseDir = "/";
-				ftp.changeWorkingDirectory(baseDir);
+				ftpDto.getFtp().changeWorkingDirectory(baseDir);
 			}
 
 			try {
@@ -314,49 +284,55 @@ public class OperacionesEventHandler {
 				String unidadesDir = baseDir + "/UNIDADES/";
 				unidadesDir = unidadesDir.replace("//", "/");
 				try {
-					ftp.mkd(unidadesDir);
-					ftp.mkd(unidadesDir + carpetaUnidad);
-					ftp.mkd(unidadesDir + carpetaUnidad + "/INFORMES "
+					ftpDto.getFtp().mkd(unidadesDir);
+					ftpDto.getFtp().mkd(unidadesDir + carpetaUnidad);
+					ftpDto.getFtp().mkd(unidadesDir + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion);
-					ftp.mkd(unidadesDir + carpetaUnidad + "/INFORMES "
+
+					operationPath = unidadesDir + carpetaUnidad + "/INFORMES "
+							+ carpetaOperacion;
+
+					ftpDto.getFtp().mkd(unidadesDir + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion + "/PERSONALIZADOS");
 					log.info(unidadesDir + carpetaUnidad + "/INFORMES "
 							+ carpetaOperacion + "/PERSONALIZADOS");
 				} catch (Exception e) {
-					Desconectar(ftp);
+					Desconectar(ftpDto.getFtp());
 					log.error("Fallo creando estructura de Directorios " + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 
 				try {
-					ftp.changeWorkingDirectory(unidadesDir + carpetaUnidad + "/INFORMES " + carpetaOperacion);
-					String currentDir = ftp.printWorkingDirectory();
+					ftpDto.getFtp()
+							.changeWorkingDirectory(unidadesDir + carpetaUnidad + "/INFORMES " + carpetaOperacion);
+					String currentDir = ftpDto.getFtp().printWorkingDirectory();
 					log.info("Directorio actual: " + currentDir);
-					ftp.mkd("FIRMADOS");
+					ftpDto.getFtp().mkd("FIRMADOS");
 				} catch (Exception e) {
-					Desconectar(ftp);
+					Desconectar(ftpDto.getFtp());
 					log.info("Fallo creando segunda Carpeta FIRMADOS" + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 				try {
-					ftp.mkd("ORIGINALES");
+					ftpDto.getFtp().mkd("ORIGINALES");
 				} catch (Exception e) {
-					Desconectar(ftp);
+					Desconectar(ftpDto.getFtp());
 					log.info("Fallo creando Carpeta ORIGINALES" + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 				try {
-					ftp.mkd("PENDIENTES DE FIRMA");
+					ftpDto.getFtp().mkd("PENDIENTES DE FIRMA");
 				} catch (Exception e) {
-					Desconectar(ftp);
+					Desconectar(ftpDto.getFtp());
 					log.info("Fallo creando Carpeta PENDIENTES DE FIRMA " + e.getMessage());
 					throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 				}
 
-				Desconectar(ftp);
+				Desconectar(ftpDto.getFtp());
+				return operationPath;
 			} catch (Exception e) {
 				log.info("Fallo, Creando Estructura de Directorios para la Operación " + e.getMessage());
-				Desconectar(ftp);
+				Desconectar(ftpDto.getFtp());
 				throw new Exception("Fallo Creando Estructura de Directorios para la Operación");
 			}
 		} else {

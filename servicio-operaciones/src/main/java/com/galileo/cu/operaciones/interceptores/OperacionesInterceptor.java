@@ -4,7 +4,9 @@ import com.galileo.cu.commons.models.Operaciones;
 import com.galileo.cu.commons.models.dto.JwtObjectMap;
 import com.galileo.cu.commons.models.dto.OriginCascading;
 import com.galileo.cu.operaciones.cliente.TraccarFeign;
+import com.galileo.cu.operaciones.dto.FtpDTO;
 import com.galileo.cu.operaciones.repositorios.OperacionesRepository;
+import com.galileo.cu.operaciones.servicios.FtpService;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -46,6 +48,9 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 
 	@Autowired
 	private TraccarFeign apis;
+
+	@Autowired
+	private FtpService ftpService;
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -151,6 +156,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		boolean handleBeforeCreate = (boolean) request.getAttribute("handleBeforeCreate") || false;
 		boolean handleAfterCreate = (boolean) request.getAttribute("handleAfterCreate") || false;
 		String handleBD = request.getAttribute("handleBD").toString();
+		String operationPath = request.getAttribute("operationPath").toString();
 
 		if (handleBeforeCreate)
 			log.info("handleBeforeCreate==true");
@@ -161,6 +167,9 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		if (handleAfterCreate)
 			log.info("handleAfterCreate==true");
 
+		if (handleAfterCreate)
+			log.info("operationPath=={}", operationPath);
+
 		if (handleBeforeCreate && handleBD.equals("false")) {
 			try {
 				log.info("Ejecutando rollback operaciones, por fallo en BD.");
@@ -170,11 +179,39 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 				String err = "Fallo intentando eliminar la operación en las apis externas, debido a fallo intentando insertar operación en la BD.";
 				log.error(err, e);
 			}
+
+			if (!Strings.isNullOrEmpty(operationPath)) {
+				try {
+					removeDirectoriesStruct(operationPath);
+				} catch (Exception e) {
+					String err = "Fallo intentando eliminar estructura de directorios, ejecutando rollback por fallo en BD.";
+					log.error(err, e.getMessage());
+				}
+			}
+		} else if (!handleAfterCreate) {
+			if (!Strings.isNullOrEmpty(operationPath)) {
+				try {
+					removeDirectoriesStruct(operationPath);
+				} catch (Exception e) {
+					String err = "Fallo intentando eliminar estructura de directorios, ejecutando rollback por fallo en apis externas.";
+					log.error(err, e.getMessage());
+				}
+			}
 		}
 
 		if (ex != null) {
 			// log.error("Operación = {}", operaciones.getDescripcion());
 			log.error("**********afterCompletion Detectando errores en el servicio", ex.getMessage());
+		}
+	}
+
+	private void removeDirectoriesStruct(String operationPath) throws IOException {
+		FtpDTO ftpDto = ftpService.connectFTP(null);
+		// Eliminación del directorio
+		boolean removed = ftpDto.ftp.removeDirectory(operationPath);
+		if (removed) {
+			log.info("El directorio {}, fue eliminado satisfactoriamente, ejecutando rollback.",
+					operationPath);
 		}
 	}
 }
