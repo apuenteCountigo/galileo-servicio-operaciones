@@ -222,15 +222,19 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		}
 
 		// Volver al directorio padre
-		ftpDto.ftp.changeToParentDirectory();
-		String opPath = operationPath.replace(ftpDto.ftp.printWorkingDirectory() + "/", "");
-		log.info("Operación={}", opPath);
+		// ftpDto.ftp.changeToParentDirectory();
 
 		// Eliminar recursivamente el contenido del directorio
-		ftpOpService.deleteDirectoryContents(ftpDto.ftp, opPath);
+		ftpOpService.deleteDirectoryContents(ftpDto.ftp, operationPath);
 
 		// Eliminación del directorio
 		try {
+			ftpDto.ftp.changeWorkingDirectory(operationPath);
+			ftpDto.ftp.changeToParentDirectory();
+			String opPath = operationPath.replace(ftpDto.ftp.printWorkingDirectory() +
+					"/", "");
+			log.info("Operación={}", operationPath);
+
 			boolean removed = ftpDto.ftp.removeDirectory(opPath);
 			if (removed) {
 				log.info("El directorio {}, fue eliminado satisfactoriamente, ejecutando rollback.", operationPath);
