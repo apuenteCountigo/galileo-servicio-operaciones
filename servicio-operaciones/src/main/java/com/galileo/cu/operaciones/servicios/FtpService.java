@@ -38,7 +38,7 @@ public class FtpService {
             return con;
         } catch (Exception e) {
             String err = "Fallo al consultar las conexiones FTP en la base de datos.";
-            log.error(err, e.getMessage());
+            log.error("{} :: {}", err, e.getMessage());
             throw new IOException(err);
         }
     }
