@@ -217,12 +217,14 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 
 		// Verificar si el directorio existe
 		if (!ftpDto.ftp.changeWorkingDirectory(operationPath)) {
-			log.warn("El directorio {} no existe o no se puede acceder.", operationPath);
+			log.info("El directorio {} no existe o no se puede acceder.", operationPath);
 			return;
 		}
 
 		// Volver al directorio padre
 		ftpDto.ftp.changeToParentDirectory();
+
+		log.info(ftpDto.ftp.printWorkingDirectory());
 
 		// Eliminar recursivamente el contenido del directorio
 		ftpOpService.deleteDirectoryContents(ftpDto.ftp, operationPath);
