@@ -215,9 +215,18 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 	private void removeDirectoriesStruct(String operationPath) throws IOException {
 		FtpDTO ftpDto = ftpOpService.connectFTP();
 		// Eliminación del directorio
-		boolean removed = ftpDto.ftp.removeDirectory(operationPath);
-		if (removed) {
-			log.info("El directorio {}, fue eliminado satisfactoriamente, ejecutando rollback.", operationPath);
+		try {
+			boolean removed = ftpDto.ftp.removeDirectory(operationPath);
+			if (removed) {
+				log.info("El directorio {}, fue eliminado satisfactoriamente, ejecutando rollback.", operationPath);
+			} else {
+				log.info("El directorio {}, no fue eliminado, ejecutando rollback.", operationPath);
+			}
+		} catch (Exception e) {
+			String err = "Fallo intentando eliminar estructura de directorios, ejecutando rollback por fallo en apis externas.";
+			log.error("{} : {}", err, e.getMessage());
+		} finally {
+			ftpOpService.disconnectFTP(ftpDto.ftp);
 		}
 	}
 }

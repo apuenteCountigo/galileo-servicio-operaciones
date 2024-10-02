@@ -141,7 +141,7 @@ public class FtpOpService {
         }
     }
 
-    private void disconnectFTP(FTPClient ftp) throws IOException {
+    public void disconnectFTP(FTPClient ftp) throws IOException {
         log.info("INICIO disconnectFTP");
         if (ftp != null && ftp.isConnected()) {
             try {
