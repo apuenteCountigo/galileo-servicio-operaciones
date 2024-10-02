@@ -29,7 +29,7 @@ public class FtpService {
 
     private Optional<Conexiones> getFTPConnection() {
         try {
-            return Optional.ofNullable(conRepo.findFirstByServicioContaining("ftp"));
+            return Optional.ofNullable(conRepo.findFirstByServicioContaining("FTP"));
         } catch (Exception e) {
             log.error("Fallo al consultar las conexiones FTP en la base de datos", e);
             return Optional.empty();
@@ -43,6 +43,11 @@ public class FtpService {
 
         if (ftp == null || !ftp.isConnected()) {
             Optional<Conexiones> con = getFTPConnection();
+            if (con == null) {
+                String err = "Fallo, no existe una conexión FTP.";
+                log.error(err);
+                throw new IOException(err);
+            }
             try {
                 ftp = makeFTPConnection(con.get());
             } catch (Exception e) {
