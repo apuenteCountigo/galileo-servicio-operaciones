@@ -177,7 +177,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		if (handleAfterCreate)
 			log.info("operationPath=={}", operationPath);
 
-		if (handleBeforeCreate && handleBD) {
+		if (handleBeforeCreate && !handleBD) {
 			try {
 				log.info("Ejecutando rollback operaciones, por fallo en BD.");
 				apis.borrar(operaciones);
@@ -191,11 +191,11 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 				try {
 					removeDirectoriesStruct(operationPath);
 				} catch (Exception e) {
-					String err = "Fallo intentando eliminar estructura de directorios, ejecutando rollback por fallo en BD.";
-					log.error(err, e.getMessage());
+					String err = "Fallo intentando eliminar estructura de directorios, ejecutando rollback por fallo en apis externas.";
+					log.error("{} : {}", err, e.getMessage());
 				}
 			}
-		} else if (!handleAfterCreate) {
+		} else if (!handleBeforeCreate) {
 			if (!Strings.isNullOrEmpty(operationPath)) {
 				try {
 					removeDirectoriesStruct(operationPath);
