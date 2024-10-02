@@ -28,18 +28,26 @@ public class FtpService {
     }
 
     private Conexiones getFTPConnection() throws IOException {
-        return Optional.ofNullable(conRepo.findFirstByServicioContaining("FTP"))
-                .orElseThrow(() -> {
-                    String err = "Fallo, no existe una conexión FTP.";
-                    log.error(err);
-                    return new IOException(err);
-                });
+        log.info("INICIO getFTPConnection");
+        try {
+            return conRepo.findFirstByServicioContaining("FTP");
+        } catch (Exception e) {
+            String err = "Fallo, no existe una conexión FTP.";
+            log.error("{} : {}", err, e.getMessage());
+            throw new IOException(err);
+        }
     }
 
     public FtpDTO connectFTP() throws IOException {
         log.info("INICIO connectFTP");
         FTPClient ftp = null;
-        Conexiones con = getFTPConnection();
+        Conexiones con = null;
+
+        try {
+            con = getFTPConnection();
+        } catch (Exception e) {
+            throw new IOException(e.getMessage());
+        }
 
         if (con != null) {
             try {
