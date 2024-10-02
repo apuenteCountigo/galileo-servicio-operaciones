@@ -29,7 +29,7 @@ import com.galileo.cu.commons.models.Usuarios;
 import com.galileo.cu.operaciones.repositorios.PermisosRepository;
 import com.galileo.cu.operaciones.repositorios.TrazasRepository;
 import com.galileo.cu.operaciones.repositorios.UnidadesRepository;
-import com.galileo.cu.operaciones.servicios.FtpService;
+import com.galileo.cu.operaciones.servicios.FtpOpService;
 import com.google.common.base.Strings;
 
 import lombok.extern.slf4j.Slf4j;
@@ -67,7 +67,7 @@ public class OperacionesEventHandler {
 	ConexionesRepository conRepo;
 
 	@Autowired
-	FtpService ftpService;
+	FtpOpService ftpOpService;
 
 	public OperacionesEventHandler(HttpServletRequest request) {
 		this.req = request;
@@ -247,7 +247,7 @@ public class OperacionesEventHandler {
 	}
 
 	public String CrearDirectorios(Operaciones op) throws Exception {
-		FtpDTO ftpDto = ftpService.connectFTP();
+		FtpDTO ftpDto = ftpOpService.connectFTP();
 		String operationPath = "";
 
 		if (ftpDto.getFtp() != null && ftpDto.getFtp().isConnected()) {

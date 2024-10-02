@@ -6,7 +6,7 @@ import com.galileo.cu.commons.models.dto.OriginCascading;
 import com.galileo.cu.operaciones.cliente.TraccarFeign;
 import com.galileo.cu.operaciones.dto.FtpDTO;
 import com.galileo.cu.operaciones.repositorios.OperacionesRepository;
-import com.galileo.cu.operaciones.servicios.FtpService;
+import com.galileo.cu.operaciones.servicios.FtpOpService;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 	private TraccarFeign apis;
 
 	@Autowired
-	private FtpService ftpService;
+	private FtpOpService ftpOpService;
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -213,7 +213,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 	}
 
 	private void removeDirectoriesStruct(String operationPath) throws IOException {
-		FtpDTO ftpDto = ftpService.connectFTP();
+		FtpDTO ftpDto = ftpOpService.connectFTP();
 		// Eliminación del directorio
 		// boolean removed = ftpDto.ftp.removeDirectory(operationPath);
 		// if (removed) {

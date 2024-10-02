@@ -18,13 +18,17 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-public class FtpService {
-    @Autowired
-    private ConexionesRepository conRepo;
+public class FtpOpService {
+    private final ConexionesRepository conRepo;
 
     private static final String DEFAULT_DIRECTORY = "/";
     private static final int DEFAULT_FTP_PORT = 21;
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Autowired
+    public FtpOpService(ConexionesRepository conRepo) {
+        this.conRepo = conRepo;
+    }
 
     private Optional<Conexiones> getFTPConnection() {
         log.info("INICIO getFTPConnection");
@@ -40,13 +44,8 @@ public class FtpService {
     public FtpDTO connectFTP() throws IOException {
         log.info("INICIO connectFTP");
         FTPClient ftp = null;
-        Conexiones con = null;
-
-        try {
-            con = getFTPConnection().get();
-        } catch (Exception e) {
-            throw new IOException(e.getMessage());
-        }
+        Conexiones con = getFTPConnection()
+                .orElseThrow(() -> new IOException("No existe un servicio FTP entre las conexiones"));
 
         if (con != null) {
             try {
