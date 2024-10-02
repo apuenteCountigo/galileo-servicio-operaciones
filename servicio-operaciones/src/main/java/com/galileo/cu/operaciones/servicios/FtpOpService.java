@@ -161,6 +161,7 @@ public class FtpOpService {
 
     public void deleteDirectoryContents(FTPClient ftpClient, String directoryPath) throws IOException {
         log.info("deleteDirectoryContents");
+        log.info(ftpClient.printWorkingDirectory());
         FTPFile[] subFiles = ftpClient.listFiles(directoryPath);
         if (subFiles != null)
             log.info("subFiles {}", subFiles.length);
