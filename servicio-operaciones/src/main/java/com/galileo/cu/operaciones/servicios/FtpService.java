@@ -28,29 +28,17 @@ public class FtpService {
     }
 
     private Conexiones getFTPConnection() throws IOException {
-        try {
-            Conexiones con = conRepo.findFirstByServicioContaining("FTP");
-            if (con == null) {
-                String err = "Fallo, no existe una conexión FTP.";
-                log.error(err);
-                throw new IOException(err);
-            }
-            return con;
-        } catch (Exception e) {
-            String err = "Fallo al consultar las conexiones FTP en la base de datos.";
-            log.error("{} :: {}", err, e.getMessage());
-            throw new IOException(err);
-        }
+        return Optional.ofNullable(conRepo.findFirstByServicioContaining("FTP"))
+                .orElseThrow(() -> {
+                    String err = "Fallo, no existe una conexión FTP.";
+                    log.error(err);
+                    return new IOException(err);
+                });
     }
 
     public FtpDTO connectFTP(FTPClient ftp) throws IOException {
-        if (ftp == null) {
-            ftp = new FTPClient();
-        }
-
         if (ftp == null || !ftp.isConnected()) {
             Conexiones con = getFTPConnection();
-
             try {
                 ftp = makeFTPConnection(con);
             } catch (Exception e) {
@@ -63,8 +51,7 @@ public class FtpService {
             }
         }
 
-        FtpDTO ftpDto = new FtpDTO(ftp, DEFAULT_DIRECTORY);
-        return ftpDto;
+        return new FtpDTO(ftp, DEFAULT_DIRECTORY);
     }
 
     private FTPClient makeFTPConnection(Conexiones con) throws IOException {
@@ -73,9 +60,10 @@ public class FtpService {
             int puerto = Strings.isNullOrEmpty(con.getPuerto()) ? DEFAULT_FTP_PORT : Integer.parseInt(con.getPuerto());
             ftp.connect(con.getIpServicio(), puerto);
         } catch (Exception e) {
-            String err = "Fallo al intentar crear una conexión FTP {}:{}";
-            log.error(err, con.getIpServicio(), con.getPuerto(), e);
-            throw new IOException(err + con.getIpServicio());
+            String err = String.format("Fallo al intentar crear una conexión FTP %s:%s", con.getIpServicio(),
+                    con.getPuerto());
+            log.error(err, e);
+            throw new IOException(err);
         }
 
         int reply = ftp.getReplyCode();
@@ -87,7 +75,6 @@ public class FtpService {
         }
 
         authenticateFTP(ftp, con);
-
         setUpPassiveMode(ftp);
 
         return ftp;
@@ -102,7 +89,7 @@ public class FtpService {
                 disconnectFTP(ftp);
                 throw new IOException(err);
             }
-            log.info("La Autenticación con el servidor FTP, fue exitosa");
+            log.info("La autenticación con el servidor FTP fue exitosa");
         } catch (IOException e) {
             String err = "Fallo intentando autenticarse con el servidor FTP";
             log.error("{}", err, e);
@@ -123,27 +110,18 @@ public class FtpService {
         }
     }
 
-    private String getFTPDirectory(FTPClient ftp) throws IOException {
-        try {
-            return ftp.printWorkingDirectory();
-        } catch (Exception e) {
-            String err = "Fallo al obtener el directorio predeterminado del servidor FTP";
-            log.error(err, e);
-            disconnectFTP(ftp);
-            throw new IOException(err, e);
-        }
-    }
-
     private void disconnectFTP(FTPClient ftp) throws IOException {
         if (ftp != null && ftp.isConnected()) {
             try {
                 ftp.logout();
-                ftp.disconnect();
-                ftp = null;
             } catch (IOException e) {
-                String err = "Fallo al desconectar el servidor FTP";
-                log.error("{}", err, e);
-                throw new IOException(err);
+                log.error("Fallo durante el logout del servidor FTP: {}", e.getMessage(), e);
+            } finally {
+                try {
+                    ftp.disconnect();
+                } catch (IOException e) {
+                    log.error("Fallo durante la desconexión del servidor FTP: {}", e.getMessage(), e);
+                }
             }
         }
     }
