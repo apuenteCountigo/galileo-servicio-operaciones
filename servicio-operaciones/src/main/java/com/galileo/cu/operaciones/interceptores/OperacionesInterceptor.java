@@ -214,6 +214,19 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 
 	private void removeDirectoriesStruct(String operationPath) throws IOException {
 		FtpDTO ftpDto = ftpOpService.connectFTP();
+
+		// Verificar si el directorio existe
+		if (!ftpDto.ftp.changeWorkingDirectory(operationPath)) {
+			log.warn("El directorio {} no existe o no se puede acceder.", operationPath);
+			return;
+		}
+
+		// Volver al directorio padre
+		ftpDto.ftp.changeToParentDirectory();
+
+		// Eliminar recursivamente el contenido del directorio
+		ftpOpService.deleteDirectoryContents(ftpDto.ftp, operationPath);
+
 		// Eliminación del directorio
 		try {
 			boolean removed = ftpDto.ftp.removeDirectory(operationPath);

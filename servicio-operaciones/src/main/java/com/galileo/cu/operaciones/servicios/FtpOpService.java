@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -153,6 +154,28 @@ public class FtpOpService {
                     ftp.disconnect();
                 } catch (IOException e) {
                     log.error("Fallo durante la desconexión del servidor FTP: {}", e.getMessage(), e);
+                }
+            }
+        }
+    }
+
+    public void deleteDirectoryContents(FTPClient ftpClient, String directoryPath) throws IOException {
+        FTPFile[] subFiles = ftpClient.listFiles(directoryPath);
+        if (subFiles != null && subFiles.length > 0) {
+            for (FTPFile aFile : subFiles) {
+                String currentFileName = aFile.getName();
+                String filePath = directoryPath + "/" + currentFileName;
+                if (currentFileName.equals(".") || currentFileName.equals("..")) {
+                    // Skip parent directory and directory itself
+                    continue;
+                }
+                if (aFile.isDirectory()) {
+                    // Remove sub directory
+                    deleteDirectoryContents(ftpClient, filePath);
+                    ftpClient.removeDirectory(filePath);
+                } else {
+                    // Delete file
+                    ftpClient.deleteFile(filePath);
                 }
             }
         }
