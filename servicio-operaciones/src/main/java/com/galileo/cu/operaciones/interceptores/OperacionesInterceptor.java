@@ -201,7 +201,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 					removeDirectoriesStruct(operationPath);
 				} catch (Exception e) {
 					String err = "Fallo intentando eliminar estructura de directorios, ejecutando rollback por fallo en apis externas.";
-					log.error(err, e.getMessage());
+					log.error("{} : {}", err, e.getMessage());
 				}
 			}
 		}
