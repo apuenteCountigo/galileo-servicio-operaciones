@@ -39,14 +39,21 @@ public class FtpService {
     public FtpDTO connectFTP() throws IOException {
         FTPClient ftp = null;
         Conexiones con = getFTPConnection();
-        try {
-            ftp = makeFTPConnection(con);
-        } catch (Exception e) {
-            if (e.getMessage().contains("Fallo") || e.getMessage().contains("Falló")) {
-                throw new IOException(e.getMessage());
+
+        if (con != null) {
+            try {
+                ftp = makeFTPConnection(con);
+            } catch (Exception e) {
+                if (e.getMessage().contains("Fallo") || e.getMessage().contains("Falló")) {
+                    throw new IOException(e.getMessage());
+                }
+                String err = "Fallo al conectar con el servidor FTP";
+                log.error("{}", err, e);
+                throw new IOException(err);
             }
-            String err = "Fallo al conectar con el servidor FTP";
-            log.error("{}", err, e);
+        } else {
+            String err = "Fallo, no existe una conexión FTP, entre las conexiones.";
+            log.error("{}", err);
             throw new IOException(err);
         }
 
