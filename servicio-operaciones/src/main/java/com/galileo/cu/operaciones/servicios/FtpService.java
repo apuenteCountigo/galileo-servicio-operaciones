@@ -36,19 +36,18 @@ public class FtpService {
                 });
     }
 
-    public FtpDTO connectFTP(FTPClient ftp) throws IOException {
-        if (ftp == null || !ftp.isConnected()) {
-            Conexiones con = getFTPConnection();
-            try {
-                ftp = makeFTPConnection(con);
-            } catch (Exception e) {
-                if (e.getMessage().contains("Fallo") || e.getMessage().contains("Falló")) {
-                    throw new IOException(e.getMessage());
-                }
-                String err = "Fallo al conectar con el servidor FTP";
-                log.error("{}", err, e);
-                throw new IOException(err);
+    public FtpDTO connectFTP() throws IOException {
+        FTPClient ftp = null;
+        Conexiones con = getFTPConnection();
+        try {
+            ftp = makeFTPConnection(con);
+        } catch (Exception e) {
+            if (e.getMessage().contains("Fallo") || e.getMessage().contains("Falló")) {
+                throw new IOException(e.getMessage());
             }
+            String err = "Fallo al conectar con el servidor FTP";
+            log.error("{}", err, e);
+            throw new IOException(err);
         }
 
         return new FtpDTO(ftp, DEFAULT_DIRECTORY);
