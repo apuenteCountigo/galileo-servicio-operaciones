@@ -223,7 +223,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 
 		// Volver al directorio padre
 		ftpDto.ftp.changeToParentDirectory();
-		String opPath = operationPath.replace(operationPath, ftpDto.ftp.printWorkingDirectory() + "/");
+		String opPath = operationPath.replace(ftpDto.ftp.printWorkingDirectory() + "/", "");
 		log.info("Operación={}", opPath);
 
 		// Eliminar recursivamente el contenido del directorio
