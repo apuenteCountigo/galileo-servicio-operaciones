@@ -34,7 +34,7 @@ public class FtpOpService {
         log.info("INICIO getFTPConnection");
         try {
             String servicio = "FTP";
-            return Optional.ofNullable(conRepo.findFirstByServicioLike(servicio));
+            return Optional.ofNullable(conRepo.findFirstByServicioContaining(servicio));
         } catch (Exception e) {
             String err = "Fallo, no existe una conexión FTP.";
             log.error("{} : {}", err, e.getMessage());
