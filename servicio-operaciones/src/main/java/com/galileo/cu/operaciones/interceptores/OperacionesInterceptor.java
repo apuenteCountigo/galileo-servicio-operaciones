@@ -153,9 +153,14 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		// Recuperar el objeto Operaciones desde los atributos de la solicitud
 		Operaciones operaciones = null;
 		operaciones = (Operaciones) request.getAttribute("operaciones");
-		boolean handleBeforeCreate = (boolean) request.getAttribute("handleBeforeCreate") || false;
-		boolean handleAfterCreate = (boolean) request.getAttribute("handleAfterCreate") || false;
-		boolean handleBD = (boolean) request.getAttribute("handleBD") || false;
+		boolean handleBeforeCreate = request.getAttribute("handleBeforeCreate") != null
+				? (boolean) request.getAttribute("handleBeforeCreate")
+				: false;
+		boolean handleAfterCreate = request.getAttribute("handleAfterCreate") != null
+				? (boolean) request.getAttribute("handleAfterCreate")
+				: false;
+		boolean handleBD = request.getAttribute("handleBD") != null ? (boolean) request.getAttribute("handleBD")
+				: false;
 		String operationPath = request.getAttribute("operationPath") != null
 				? request.getAttribute("operationPath").toString()
 				: "";

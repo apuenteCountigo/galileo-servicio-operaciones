@@ -29,9 +29,10 @@ public class FtpService {
 
     private Optional<Conexiones> getFTPConnection() {
         try {
-            return Optional.ofNullable(conRepo.findFirstByServicioContaining("FTP"));
+            Conexiones con = conRepo.findFirstByServicioContaining("FTP");
+            return Optional.ofNullable(con);
         } catch (Exception e) {
-            log.error("Fallo al consultar las conexiones FTP en la base de datos", e);
+            log.error("Fallo al consultar las conexiones FTP en la base de datos", e.getMessage());
             return Optional.empty();
         }
     }
