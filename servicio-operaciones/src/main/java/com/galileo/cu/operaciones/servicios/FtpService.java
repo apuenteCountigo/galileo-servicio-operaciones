@@ -37,13 +37,18 @@ public class FtpService {
     }
 
     public FtpDTO connectFTP() throws IOException {
+        log.info("INICIO connectFTP");
         FTPClient ftp = null;
         Conexiones con = getFTPConnection();
 
         if (con != null) {
             try {
                 ftp = makeFTPConnection(con);
+                return new FtpDTO(ftp, DEFAULT_DIRECTORY);
             } catch (Exception e) {
+                if (ftp != null) {
+                    disconnectFTP(ftp);
+                }
                 if (e.getMessage().contains("Fallo") || e.getMessage().contains("Falló")) {
                     throw new IOException(e.getMessage());
                 }
@@ -56,8 +61,6 @@ public class FtpService {
             log.error("{}", err);
             throw new IOException(err);
         }
-
-        return new FtpDTO(ftp, DEFAULT_DIRECTORY);
     }
 
     private FTPClient makeFTPConnection(Conexiones con) throws IOException {
@@ -65,25 +68,34 @@ public class FtpService {
         try {
             int puerto = Strings.isNullOrEmpty(con.getPuerto()) ? DEFAULT_FTP_PORT : Integer.parseInt(con.getPuerto());
             ftp.connect(con.getIpServicio(), puerto);
+
+            int reply = ftp.getReplyCode();
+            if (!FTPReply.isPositiveCompletion(reply)) {
+                String err = "Fallo intentando conectar con el servidor FTP " + con.getIpServicio();
+                log.error(err);
+
+                if (ftp != null && ftp.isConnected()) {
+                    disconnectFTP(ftp);
+                }
+
+                throw new IOException(err);
+            }
+
+            authenticateFTP(ftp, con);
+            setUpPassiveMode(ftp);
+            return ftp;
+
         } catch (Exception e) {
             String err = String.format("Fallo al intentar crear una conexión FTP %s:%s", con.getIpServicio(),
                     con.getPuerto());
             log.error(err, e);
+
+            if (ftp != null && ftp.isConnected()) {
+                disconnectFTP(ftp);
+            }
+
             throw new IOException(err);
         }
-
-        int reply = ftp.getReplyCode();
-        if (!FTPReply.isPositiveCompletion(reply)) {
-            String err = "Fallo intentando conectar con el servidor FTP " + con.getIpServicio();
-            log.error(err);
-            disconnectFTP(ftp);
-            throw new IOException(err);
-        }
-
-        authenticateFTP(ftp, con);
-        setUpPassiveMode(ftp);
-
-        return ftp;
     }
 
     private void authenticateFTP(FTPClient ftp, Conexiones con) throws IOException {
