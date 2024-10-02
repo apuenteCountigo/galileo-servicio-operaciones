@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,14 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 public class FtpService {
-    private final ConexionesRepository conRepo;
+    @Autowired
+    private ConexionesRepository conRepo;
+
     private static final String DEFAULT_DIRECTORY = "/";
     private static final int DEFAULT_FTP_PORT = 21;
     private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    public FtpService(ConexionesRepository conRepo) {
-        this.conRepo = conRepo;
-    }
 
     private Optional<Conexiones> getFTPConnection() {
         log.info("INICIO getFTPConnection");
