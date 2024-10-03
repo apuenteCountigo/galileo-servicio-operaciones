@@ -32,6 +32,7 @@ import com.galileo.cu.operaciones.repositorios.UnidadesRepository;
 import com.galileo.cu.operaciones.servicios.FtpOpService;
 import com.google.common.base.Strings;
 
+import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 
 import com.galileo.cu.operaciones.cliente.TraccarFeign;
@@ -118,6 +119,16 @@ public class OperacionesEventHandler {
 			operaciones.setIdDataminer(operacionesUpdate.getIdDataminer());
 			operaciones.setIdElement(operacionesUpdate.getIdElement());
 			log.info("**** servidor=" + operaciones.getServidor().getServicio());
+		} catch (FeignException fe) {
+			// Capturamos errores Feign específicos como el 500 que mencionas
+			if (fe.status() == 500 && fe.contentUTF8().contains("Fallo")) {
+				log.error(fe.getMessage());
+				throw new RuntimeException(fe.getMessage());
+			} else {
+				String err = "Fallo creando operación en apis externas, VER LOGS.";
+				log.error(err, fe);
+				throw new RuntimeException(err);
+			}
 		} catch (Exception e) {
 			if (e.getMessage().contains("Fallo")) {
 				log.error(e.getMessage());
