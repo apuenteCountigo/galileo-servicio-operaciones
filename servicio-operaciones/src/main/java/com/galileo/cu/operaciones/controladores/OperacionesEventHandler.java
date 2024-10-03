@@ -18,6 +18,7 @@ import org.springframework.data.rest.core.annotation.HandleBeforeDelete;
 import org.springframework.data.rest.core.annotation.RepositoryEventHandler;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.galileo.cu.commons.models.AccionEntidad;
 import com.galileo.cu.commons.models.Conexiones;
@@ -120,20 +121,33 @@ public class OperacionesEventHandler {
 			operaciones.setIdElement(operacionesUpdate.getIdElement());
 			log.info("**** servidor=" + operaciones.getServidor().getServicio());
 		} catch (FeignException fe) {
-			// Capturamos errores Feign específicos como el 500 que mencionas
-			if (fe.status() == 500 && fe.contentUTF8().contains("Fallo")) {
-				log.error("Fallo específico1 de traccar");
-				log.error(fe.getMessage());
-				throw new RuntimeException(fe.getMessage());
+			// Capturamos el cuerpo de la respuesta en formato JSON
+			String responseBody = fe.contentUTF8(); // Capturamos el cuerpo de la respuesta como String
+
+			// Si el cuerpo contiene un JSON, lo podemos parsear para extraer el mensaje
+			if (responseBody != null && responseBody.contains("message")) {
+				try {
+					// Utilizamos Jackson ObjectMapper para deserializar el JSON
+					ObjectMapper objectMapper = new ObjectMapper();
+					JsonNode jsonResponse = objectMapper.readTree(responseBody); // Parseamos el JSON
+
+					// Extraemos el campo 'message'
+					String errorMessage = jsonResponse.get("message").asText();
+
+					log.error(errorMessage);
+					throw new RuntimeException(errorMessage);
+				} catch (Exception ex) {
+					// En caso de que no sea un JSON válido o haya un error al parsear
+					log.error("Fallo procesando la respuesta del servidor: " + responseBody, fe);
+					throw new RuntimeException("Fallo procesando la respuesta del servidor: " + responseBody);
+				}
 			} else {
 				String err = "Fallo creando operación en apis externas, VER LOGS.";
-				log.error("Fallo específico2 de traccar");
 				log.error(err, fe);
 				throw new RuntimeException(err);
 			}
 		} catch (Exception e) {
 			if (e.getMessage().contains("Fallo")) {
-				log.error("Fallo general de traccar");
 				log.error(e.getMessage());
 				throw new RuntimeException(e.getMessage());
 			} else {
