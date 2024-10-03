@@ -168,6 +168,9 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		String operationPath = request.getAttribute("operationPath") != null
 				? request.getAttribute("operationPath").toString()
 				: "";
+		String error = request.getAttribute("ex") != null
+				? request.getAttribute("ex").toString()
+				: "";
 
 		if (handleBeforeCreate)
 			log.info("handleBeforeCreate==true");
@@ -190,22 +193,10 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 				String err = "Fallo intentando eliminar la operación en las apis externas, debido a fallo intentando insertar operación en la BD.";
 				log.error(err, e);
 			}
-
-			// if (!Strings.isNullOrEmpty(operationPath) &&
-			// !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
-			// && !ex.getMessage().contains("ya existe")) {
-			// try {
-			// removeDirectoriesStruct(operationPath);
-			// } catch (Exception e) {
-			// String err = "Fallo intentando eliminar estructura de directorios, ejecutando
-			// rollback por fallo en apis externas.";
-			// log.error("{} : {}", err, e.getMessage());
-			// }
-			// }
 		}
 
-		if (isFtpOK && !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
-				&& !ex.getMessage().contains("ya existe")) {
+		if (isFtpOK && !error.contains("constraint [uk_nombre_idUnidad]")
+				&& !error.contains("ya existe")) {
 			if (!Strings.isNullOrEmpty(operationPath)) {
 				try {
 					removeDirectoriesStruct(operationPath);
