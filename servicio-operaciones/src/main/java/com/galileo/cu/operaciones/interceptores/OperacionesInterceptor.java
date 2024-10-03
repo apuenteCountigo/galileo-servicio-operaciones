@@ -163,6 +163,8 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 				: false;
 		boolean isApisOK = request.getAttribute("isApisOK") != null ? (boolean) request.getAttribute("isApisOK")
 				: false;
+		boolean isFtpOK = request.getAttribute("isFtpOK") != null ? (boolean) request.getAttribute("isFtpOK")
+				: false;
 		String operationPath = request.getAttribute("operationPath") != null
 				? request.getAttribute("operationPath").toString()
 				: "";
@@ -189,16 +191,20 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 				log.error(err, e);
 			}
 
-			if (!Strings.isNullOrEmpty(operationPath) && !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
-					&& !ex.getMessage().contains("ya existe")) {
-				try {
-					removeDirectoriesStruct(operationPath);
-				} catch (Exception e) {
-					String err = "Fallo intentando eliminar estructura de directorios, ejecutando rollback por fallo en apis externas.";
-					log.error("{} : {}", err, e.getMessage());
-				}
-			}
-		} else if (!handleBeforeCreate && !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
+			// if (!Strings.isNullOrEmpty(operationPath) &&
+			// !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
+			// && !ex.getMessage().contains("ya existe")) {
+			// try {
+			// removeDirectoriesStruct(operationPath);
+			// } catch (Exception e) {
+			// String err = "Fallo intentando eliminar estructura de directorios, ejecutando
+			// rollback por fallo en apis externas.";
+			// log.error("{} : {}", err, e.getMessage());
+			// }
+			// }
+		}
+
+		if (isFtpOK && !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
 				&& !ex.getMessage().contains("ya existe")) {
 			if (!Strings.isNullOrEmpty(operationPath)) {
 				try {

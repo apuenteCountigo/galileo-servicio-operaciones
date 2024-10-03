@@ -82,6 +82,7 @@ public class OperacionesEventHandler {
 		this.req.setAttribute("handleBD", false);
 		this.req.setAttribute("handleAfterCreate", false);
 		this.req.setAttribute("isApisOK", false);
+		this.req.setAttribute("isFtpOK", false);
 		this.req.setAttribute("operationPath", "");
 
 		String operationPath = "";
@@ -102,6 +103,7 @@ public class OperacionesEventHandler {
 
 		try {
 			operationPath = CrearDirectorios(operaciones);
+			this.req.setAttribute("isFtpOK", true);
 		} catch (Exception e) {
 			log.info("Fallo Creando Directorios para Evidencias");
 			log.info(e.getMessage());
