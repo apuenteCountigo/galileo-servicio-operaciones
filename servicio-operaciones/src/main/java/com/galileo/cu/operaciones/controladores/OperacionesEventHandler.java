@@ -122,15 +122,18 @@ public class OperacionesEventHandler {
 		} catch (FeignException fe) {
 			// Capturamos errores Feign específicos como el 500 que mencionas
 			if (fe.status() == 500 && fe.contentUTF8().contains("Fallo")) {
+				log.error("Fallo específico1 de traccar");
 				log.error(fe.getMessage());
 				throw new RuntimeException(fe.getMessage());
 			} else {
 				String err = "Fallo creando operación en apis externas, VER LOGS.";
+				log.error("Fallo específico2 de traccar");
 				log.error(err, fe);
 				throw new RuntimeException(err);
 			}
 		} catch (Exception e) {
 			if (e.getMessage().contains("Fallo")) {
+				log.error("Fallo general de traccar");
 				log.error(e.getMessage());
 				throw new RuntimeException(e.getMessage());
 			} else {
