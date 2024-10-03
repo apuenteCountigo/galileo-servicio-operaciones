@@ -119,24 +119,9 @@ public class OperacionesEventHandler {
 			operaciones.setIdElement(operacionesUpdate.getIdElement());
 			log.info("**** servidor=" + operaciones.getServidor().getServicio());
 		} catch (Exception e) {
-			if (e.getMessage().contains("ya existe una operacion")) {
-				log.error("CONTIENE, ya existe una operacion ");
-				if (e.getMessage().contains("DATAMINER")) {
-					log.error("Fallo Insertando Grupo en DATAMINER " + e.getMessage());
-					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
-				} else if (e.getMessage().contains("Traccar")) {
-					log.error("Fallo Insertando Grupo en Traccar " + e.getMessage());
-					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
-				}
-			} else if (e.getMessage().contains("se ha excedido la cantidad de elementos en el DataMiner")) {
-				String err = "Fallo, se ha excedido la cantidad de elementos en el servidor DMA.";
-				log.error(err, e.getMessage());
-				throw new RuntimeException(err);
-			} else if (e.getMessage().contains(" es nulo") ||
-					e.getMessage().contains("Fallo")) {
-				String err = "Fallo, creando operación, en las apis externas. VER LOGS.";
-				log.error(err, e.getMessage());
-				throw new RuntimeException(err);
+			if (e.getMessage().contains("Fallo")) {
+				log.error(e.getMessage());
+				throw new RuntimeException(e.getMessage());
 			} else {
 				String err = "Fallo creando operación en apis externas, VER LOGS.";
 				log.error(err, e.getMessage());
