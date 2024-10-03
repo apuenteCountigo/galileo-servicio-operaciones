@@ -179,8 +179,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		if (handleAfterCreate)
 			log.info("operationPath=={}", operationPath);
 
-		if (isApisOK && !handleBD && !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
-				&& !ex.getMessage().contains("ya existe")) {
+		if (isApisOK && !handleBD) {
 			try {
 				log.info("Ejecutando rollback operaciones, por fallo en BD.");
 				apis.borrar(operaciones);
@@ -190,7 +189,8 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 				log.error(err, e);
 			}
 
-			if (!Strings.isNullOrEmpty(operationPath)) {
+			if (!Strings.isNullOrEmpty(operationPath) && !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
+					&& !ex.getMessage().contains("ya existe")) {
 				try {
 					removeDirectoriesStruct(operationPath);
 				} catch (Exception e) {
@@ -198,7 +198,8 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 					log.error("{} : {}", err, e.getMessage());
 				}
 			}
-		} else if (!handleBeforeCreate) {
+		} else if (!handleBeforeCreate && !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
+				&& !ex.getMessage().contains("ya existe")) {
 			if (!Strings.isNullOrEmpty(operationPath)) {
 				try {
 					removeDirectoriesStruct(operationPath);
