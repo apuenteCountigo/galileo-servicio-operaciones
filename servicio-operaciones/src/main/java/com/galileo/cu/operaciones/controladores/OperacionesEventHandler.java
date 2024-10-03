@@ -141,7 +141,7 @@ public class OperacionesEventHandler {
 					throw new RuntimeException(err);
 				}
 
-				log.error("Fallo-1:{}", errorMessage);
+				log.error("{}", errorMessage);
 				throw new RuntimeException(errorMessage);
 			} else {
 				String err = "Fallo creando operación en apis externas, VER LOGS.";
