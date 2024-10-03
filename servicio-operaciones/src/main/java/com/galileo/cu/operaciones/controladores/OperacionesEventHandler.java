@@ -81,6 +81,7 @@ public class OperacionesEventHandler {
 		this.req.setAttribute("handleBeforeCreate", false);
 		this.req.setAttribute("handleBD", false);
 		this.req.setAttribute("handleAfterCreate", false);
+		this.req.setAttribute("isApisOK", false);
 		this.req.setAttribute("operationPath", "");
 
 		String operationPath = "";
@@ -119,7 +120,7 @@ public class OperacionesEventHandler {
 			operaciones.setIdGrupo(operacionesUpdate.getIdGrupo());
 			operaciones.setIdDataminer(operacionesUpdate.getIdDataminer());
 			operaciones.setIdElement(operacionesUpdate.getIdElement());
-			log.info("**** servidor=" + operaciones.getServidor().getServicio());
+			this.req.setAttribute("isApisOK", true);
 		} catch (FeignException fe) {
 			// Capturamos el cuerpo de la respuesta en formato JSON
 			String responseBody = fe.contentUTF8(); // Capturamos el cuerpo de la respuesta como String
@@ -162,7 +163,7 @@ public class OperacionesEventHandler {
 		this.req.setAttribute("handleBeforeCreate", true);
 
 		if (!Strings.isNullOrEmpty(operaciones.getDescripcion()) && operaciones.getDescripcion().equals("BDFail"))
-			operaciones.setDescripcion("OPEVI");
+			throw new RuntimeException("Fallo insertando operación en la bd.");
 	}
 
 	@HandleAfterCreate

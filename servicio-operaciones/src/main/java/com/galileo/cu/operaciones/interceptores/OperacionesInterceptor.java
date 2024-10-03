@@ -161,6 +161,8 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 				: false;
 		boolean handleBD = request.getAttribute("handleBD") != null ? (boolean) request.getAttribute("handleBD")
 				: false;
+		boolean isApisOK = request.getAttribute("isApisOK") != null ? (boolean) request.getAttribute("isApisOK")
+				: false;
 		String operationPath = request.getAttribute("operationPath") != null
 				? request.getAttribute("operationPath").toString()
 				: "";
@@ -177,7 +179,8 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 		if (handleAfterCreate)
 			log.info("operationPath=={}", operationPath);
 
-		if (handleBeforeCreate && !handleBD) {
+		if (isApisOK && !handleBD && !ex.getMessage().contains("constraint [uk_nombre_idUnidad]")
+				&& !ex.getMessage().contains("ya existe")) {
 			try {
 				log.info("Ejecutando rollback operaciones, por fallo en BD.");
 				apis.borrar(operaciones);
