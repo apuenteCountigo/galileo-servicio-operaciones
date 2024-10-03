@@ -126,21 +126,23 @@ public class OperacionesEventHandler {
 
 			// Si el cuerpo contiene un JSON, lo podemos parsear para extraer el mensaje
 			if (responseBody != null && responseBody.contains("message")) {
+				// Utilizamos Jackson ObjectMapper para deserializar el JSON
+				ObjectMapper objectMapper = new ObjectMapper();
+				String errorMessage = "";
+
 				try {
-					// Utilizamos Jackson ObjectMapper para deserializar el JSON
-					ObjectMapper objectMapper = new ObjectMapper();
 					JsonNode jsonResponse = objectMapper.readTree(responseBody); // Parseamos el JSON
-
 					// Extraemos el campo 'message'
-					String errorMessage = jsonResponse.get("message").asText();
-
-					log.error(errorMessage);
-					throw new RuntimeException(errorMessage);
+					errorMessage = jsonResponse.get("message").asText();
 				} catch (Exception ex) {
 					// En caso de que no sea un JSON válido o haya un error al parsear
-					log.error("Fallo procesando la respuesta del servidor: " + responseBody, fe);
-					throw new RuntimeException("Fallo procesando la respuesta del servidor: " + responseBody);
+					String err = "Fallo procesando la respuesta de las APIS externas: {}";
+					log.error("{} {}", err, responseBody, fe);
+					throw new RuntimeException(err);
 				}
+
+				log.error("Fallo-1:{}", errorMessage);
+				throw new RuntimeException(errorMessage);
 			} else {
 				String err = "Fallo creando operación en apis externas, VER LOGS.";
 				log.error(err, fe);
