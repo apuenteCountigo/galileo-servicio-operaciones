@@ -84,6 +84,7 @@ public class OperacionesEventHandler {
 		this.req.setAttribute("isApisOK", false);
 		this.req.setAttribute("isFtpOK", false);
 		this.req.setAttribute("operationPath", "");
+		this.req.setAttribute("ex", "");
 
 		String operationPath = "";
 

@@ -195,7 +195,7 @@ public class OperacionesInterceptor implements HandlerInterceptor {
 			}
 		}
 
-		if (isFtpOK && !error.contains("constraint [uk_nombre_idUnidad]")
+		if (isFtpOK && !Strings.isNullOrEmpty(error) && !error.contains("constraint [uk_nombre_idUnidad]")
 				&& !error.contains("ya existe")) {
 			if (!Strings.isNullOrEmpty(operationPath)) {
 				try {
