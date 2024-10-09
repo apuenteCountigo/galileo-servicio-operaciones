@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - INITDEPLOY
+      - version-1.1
   workflow_dispatch:
 jobs:
   run_pull:
@@ -44,11 +44,16 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            ssh -i ~/id_rsaalain mome@192.168.0.98 '
-            cd galileo-newdev/operaciones/galileo-servicio-operaciones &&
+            ssh -i ~/id_rsaalain mome@192.168.0.212 '
+            cd galileo-dev-v1.1/operaciones &&
+            if [ ! -d "galileo-servicio-operaciones" ]; then
+              echo "validada galileo-dev-v1.1/operaciones/galileo-servicio-operaciones" &&
+              git clone https://github.com/apuenteCountigo/galileo-servicio-operaciones.git
+            fi
+            cd galileo-servicio-operaciones &&
             git fetch origin &&
-            git checkout INITDEPLOY &&
-            git reset --hard origin/INITDEPLOY &&
+            git checkout version-1.1 &&
+            git reset --hard origin/version-1.1 &&
             git pull &&
             cd servicio-operaciones &&
             export PATH=/opt/maven/bin:$PATH && mvn clean install -DskipTests &&
