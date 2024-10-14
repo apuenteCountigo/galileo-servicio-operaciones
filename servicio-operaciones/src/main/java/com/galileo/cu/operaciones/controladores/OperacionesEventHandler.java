@@ -196,12 +196,18 @@ public class OperacionesEventHandler {
 
 		if (operaciones.getIdGrupo() == null && opTmp.getIdGrupo() != null)
 			operaciones.setIdGrupo(opTmp.getIdGrupo());
+		else
+			operaciones.setIdGrupo((long) 0);
 
 		if (operaciones.getIdDataminer() == null && opTmp.getIdDataminer() != null)
 			operaciones.setIdDataminer(opTmp.getIdDataminer());
+		else
+			operaciones.setIdDataminer("0");
 
 		if (operaciones.getIdElement() == null && opTmp.getIdElement() != null)
 			operaciones.setIdElement(opTmp.getIdElement());
+		else
+			operaciones.setIdElement("0");
 
 		if (operaciones.getIdGrupo() == null || operaciones.getIdDataminer() == null
 				|| operaciones.getIdElement() == null) {
@@ -266,6 +272,30 @@ public class OperacionesEventHandler {
 			}
 			log.error("Fallo buscando relaciones con objetivos.");
 			throw new RuntimeException("Fallo buscando relaciones con objetivos.");
+		}
+
+		entMg.detach(operaciones);
+		try {
+			Operaciones opTmp = operacionesrepo.findById(operaciones.getId()).get();
+
+			if (operaciones.getIdGrupo() == null && opTmp.getIdGrupo() != null)
+				operaciones.setIdGrupo(opTmp.getIdGrupo());
+			else
+				operaciones.setIdGrupo((long) 0);
+
+			if (operaciones.getIdDataminer() == null && opTmp.getIdDataminer() != null)
+				operaciones.setIdDataminer(opTmp.getIdDataminer());
+			else
+				operaciones.setIdDataminer("0");
+
+			if (operaciones.getIdElement() == null && opTmp.getIdElement() != null)
+				operaciones.setIdElement(opTmp.getIdElement());
+			else
+				operaciones.setIdElement("0");
+		} catch (Exception e) {
+			String err = "Fallo, obteniendo ids de apis externas";
+			log.error("{}: {}", err, e.getMessage());
+			throw new RuntimeException(err);
 		}
 
 		try {
