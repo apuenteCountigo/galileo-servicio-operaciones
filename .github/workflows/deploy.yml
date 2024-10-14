@@ -45,6 +45,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             ssh -i ~/id_rsaalain mome@192.168.0.212 '
+            set -e &&
             cd galileo-dev-v1.1/operaciones &&
             if [ ! -d "galileo-servicio-operaciones" ]; then
               echo "validada galileo-dev-v1.1/operaciones/galileo-servicio-operaciones" &&
