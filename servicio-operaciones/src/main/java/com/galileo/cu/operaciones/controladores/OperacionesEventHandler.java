@@ -282,17 +282,17 @@ public class OperacionesEventHandler {
 
 			if (operaciones.getIdGrupo() == null && opTmp.getIdGrupo() != null)
 				operaciones.setIdGrupo(opTmp.getIdGrupo());
-			else
+			else if (operaciones.getIdGrupo() == null)
 				operaciones.setIdGrupo((long) 0);
 
 			if (operaciones.getIdDataminer() == null && opTmp.getIdDataminer() != null)
 				operaciones.setIdDataminer(opTmp.getIdDataminer());
-			else
+			else if (operaciones.getIdDataminer() == null)
 				operaciones.setIdDataminer("0");
 
 			if (operaciones.getIdElement() == null && opTmp.getIdElement() != null)
 				operaciones.setIdElement(opTmp.getIdElement());
-			else
+			else if (operaciones.getIdElement() == null)
 				operaciones.setIdElement("0");
 		} catch (Exception e) {
 			String err = "Fallo, obteniendo ids de apis externas";
