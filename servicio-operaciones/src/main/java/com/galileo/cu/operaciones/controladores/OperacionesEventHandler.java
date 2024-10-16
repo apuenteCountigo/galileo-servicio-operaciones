@@ -274,6 +274,8 @@ public class OperacionesEventHandler {
 			throw new RuntimeException("Fallo buscando relaciones con objetivos.");
 		}
 
+		log.info("Operaciones: id:{}, idDMA: {}, idEl: {}", operaciones.getId(), operaciones.getIdDataminer(),
+				operaciones.getIdElement());
 		entMg.detach(operaciones);
 		try {
 			Operaciones opTmp = operacionesrepo.findById(operaciones.getId()).get();
@@ -298,6 +300,8 @@ public class OperacionesEventHandler {
 			throw new RuntimeException(err);
 		}
 
+		log.info("Operaciones222: id:{}, idDMA: {}, idEl: {}", operaciones.getId(), operaciones.getIdDataminer(),
+				operaciones.getIdElement());
 		try {
 			traccar.borrar(operaciones);
 		} catch (Exception e) {
