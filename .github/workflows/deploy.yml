@@ -68,5 +68,22 @@ jobs:
               docker rmi "$IMAGE_NAME" &&
               echo "$IMAGE_NAME"
             fi;
-            docker compose up servicio-operaciones -d'
+            docker compose up servicio-operaciones -d &&
+            # Inicializar el contador
+            counter=0
+            max_retries=5
+
+            # Esperar a que la imagen "galileo/servicio-operaciones:1.1.0" esté lista
+            while ! docker images | grep -E "^galileo\/servicio-operaciones\s+1.1.0"; do
+              echo "Esperando a que la imagen servicio-operaciones:1.1.0 esté lista..."
+              sleep 5
+              counter=$((counter+1))
+
+              # Verificar si el número de intentos ha alcanzado el límite
+              if [ $counter -ge $max_retries ]; then
+                echo "Se alcanzó el número máximo de intentos. Abortando."
+                exit 1
+              fi
+            done
+            docker save -o /home/mome/galileo-images-v1.1.0/servicio-operaciones_1.1.0.tar galileo/servicio-operaciones:1.1.0'
             exit
