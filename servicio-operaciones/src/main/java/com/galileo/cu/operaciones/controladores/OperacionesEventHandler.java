@@ -115,21 +115,21 @@ public class OperacionesEventHandler {
 			operaciones.setIdDataminer(operacionesUpdate.getIdDataminer());
 			operaciones.setIdElement(operacionesUpdate.getIdElement());
 		} catch (Exception e) {
-			if (e.getMessage().contains("ya existe una operacion")) {
-				log.error("CONTIENE, ya existe una operacion ");
-				if (e.getMessage().contains("DATAMINER")) {
-					log.error("Fallo Insertando Grupo en DATAMINER " + e.getMessage());
-					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
-				} else if (e.getMessage().contains("Traccar")) {
-					log.error("Fallo Insertando Grupo en Traccar " + e.getMessage());
-					throw new RuntimeException("Fallo, ya existe una operación con este nombre");
-				}
+			String err = "Fallo creando operación en apis externas, ver logs";
+			if (e.getMessage().contains("Fallo creando operación en Dataminer: La operación ya existe")) {
+				err = "Fallo creando operación en Dataminer: La operación ya existe";
+				log.error("{} : {}", err, e.getMessage());
+				throw new RuntimeException(err);
+			} else if (e.getMessage().contains("Fallo creando operación en Traccar: La operación ya existe")) {
+				err = "Fallo creando operación en Traccar: La operación ya existe";
+				log.error("{} : {}", err, e.getMessage());
+				throw new RuntimeException(err);
 			} else if (e.getMessage().contains(" es nulo")) {
 				log.error(e.getMessage());
 				throw new RuntimeException(e.getMessage());
 			} else {
-				log.error("Fallo Insertando Grupo en apis externas " + e.getMessage());
-				throw new RuntimeException("Fallo, Insertando Grupo en apis externas, VER LOGS." + e.getMessage());
+				log.error("{} : {}", err, e.getMessage());
+				throw new RuntimeException(err);
 			}
 		}
 	}
