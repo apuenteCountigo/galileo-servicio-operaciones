@@ -73,9 +73,9 @@ jobs:
             counter=0
             max_retries=5
 
-            # Esperar a que la imagen "galileo/servicio-operaciones:1.1.0" esté lista
-            while ! docker images | grep -E "^galileo\/servicio-operaciones\s+1.1.0"; do
-              echo "Esperando a que la imagen servicio-operaciones:1.1.0 esté lista..."
+            # Esperar a que la imagen "galileo/servicio-operaciones:1.1.1" esté lista
+            while ! docker images | grep -E "^galileo\/servicio-operaciones\s+1.1.1"; do
+              echo "Esperando a que la imagen servicio-operaciones:1.1.1 esté lista..."
               sleep 5
               counter=$((counter+1))
 
@@ -85,5 +85,5 @@ jobs:
                 exit 1
               fi
             done
-            docker save -o /home/mome/galileo-images-v1.1.0/servicio-operaciones_1.1.0.tar galileo/servicio-operaciones:1.1.0'
+            docker save -o /home/mome/galileo-images-v1.1/servicio-operaciones_1.1.1.tar.gz galileo/servicio-operaciones:1.1.1'
             exit
