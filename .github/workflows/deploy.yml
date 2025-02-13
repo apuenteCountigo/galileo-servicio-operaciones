@@ -3,6 +3,12 @@ on:
     branches:
       - version-1.1
   workflow_dispatch:
+
+env:
+  VPN_SERVER: ${{ secrets.VPN_SERVER }}
+  VPN_USERNAME: ${{ secrets.VPN_USERNAME }}
+  VPN_PASSWORD: ${{ secrets.VPN_PASSWORD }}
+
 jobs:
   run_pull:
     name: run pull
@@ -35,16 +41,32 @@ jobs:
           echo "start_deploy<<EOF" >> $GITHUB_ENV
           echo "$start_deploy" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+
+      - name: Install OpenConnect
+        if: env.start_deploy == 'true'
+        run: sudo apt-get update && sudo apt-get install -y openconnect
+
+      - name: Connect to Cisco VPN
+        if: env.start_deploy == 'true'
+        run: |
+          echo "$VPN_PASSWORD" | sudo openconnect \
+            --protocol=anyconnect \
+            --user=$VPN_USERNAME \
+            --passwd-on-stdin \
+            --servercert pin-sha256:NduQ2UphG38krSVOantp2M5C5rrF8naaxGdY/5JqZ3o= \
+            --background \
+            $VPN_SERVER
+
       - name: executing remote ssh commands using ssh key
         if: env.start_deploy == 'true'
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          #key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            ssh -i ~/id_rsaalain mome@192.168.0.212 '
             set -e &&
             cd galileo-dev-v1.1/operaciones &&
             if [ ! -d "galileo-servicio-operaciones" ]; then
@@ -73,9 +95,9 @@ jobs:
             counter=0
             max_retries=5
 
-            # Esperar a que la imagen "galileo/servicio-operaciones:1.1.5" esté lista
-            while ! docker images | grep -E "^galileo\/servicio-operaciones\s+1.1.5"; do
-              echo "Esperando a que la imagen servicio-operaciones:1.1.5 esté lista..."
+            # Esperar a que la imagen "galileo/servicio-operaciones:1.1.6" esté lista
+            while ! docker images | grep -E "^galileo\/servicio-operaciones\s+1.1.6"; do
+              echo "Esperando a que la imagen servicio-operaciones:1.1.6 esté lista..."
               sleep 5
               counter=$((counter+1))
 
@@ -85,5 +107,5 @@ jobs:
                 exit 1
               fi
             done
-            docker save -o /home/mome/galileo-images-v1.1/servicio-operaciones_1.1.5.tar.gz galileo/servicio-operaciones:1.1.5'
+            docker save -o /home/mome/galileo-images-v1.1/servicio-operaciones_1.1.6.tar.gz galileo/servicio-operaciones:1.1.6
             exit
